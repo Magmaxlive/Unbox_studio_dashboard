@@ -31,6 +31,7 @@ const LoginPage = () => {
             try {
                 await login(result.data.email,result.data.password);
                 alert("Login successfull")
+                form.reset()
             } catch (error) {
                 setServerError("Unable to sign in . Check your credentials")
             }
@@ -39,7 +40,7 @@ const LoginPage = () => {
     })
   return (
     
-<div className="flex min-h-screen items-center justify-center bg-white px-4 py-10">
+<div className="flex min-h-screen items-center justify-center bg-neutral-800 px-4 py-10">
   <div className="flex w-full max-w-md flex-col overflow-hidden rounded-xl border border-white/10 bg-ink text-white shadow-2xl">
 
     {/* Brand header */}
