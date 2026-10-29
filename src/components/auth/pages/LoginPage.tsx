@@ -90,10 +90,23 @@ const LoginPage = () => {
         </form.Field>
 
         <form.Field 
-        name =
+        name = 'password'
+        validators={{
+            onBlur : zodValidator(loginSchema.shape.password)
+        }}
         >
+            {(field)=>(
+                <div className='flex flex-col gap-1'>
+                    <label htmlFor={field.name} className="mb-2 block text-sm font-medium text-neutral-200" >Password</label>
+                    <Input field={field} type='password' placeholder='Enter your password' autoComplete='current-password' />
+                </div>
+            )}
 
         </form.Field>
+
+        <button type='submit' className='bg-violet py-3 cursor-pointer px-6 w-full text-white rounded-md capitalize font-bold'>
+            sign in
+        </button>
 
       </form>
 

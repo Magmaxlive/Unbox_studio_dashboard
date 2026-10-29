@@ -31,7 +31,7 @@ export function Input({field,type='text',placeholder,autoComplete,...props}:Inpu
             onChange={(e)=>field.handleChange(e.target.value)}
             value={field.state.value}
             aria-invalid={hasError}
-            className={`w-full rounded-xl border bg-neutral-300 px-4 py-3 text-sm outline-none transition placeholder:text-neutral-600 focus:ring-2 ${
+            className={`w-full rounded-md border bg-neutral-300 px-4 py-3 text-sm outline-none text-ink transition placeholder:text-neutral-600 focus:ring-2 ${
                 hasError
                     ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
                     : "border-white/10 focus:border-violet focus:ring-violet/20"
