@@ -4,7 +4,6 @@ import { useForm } from '@tanstack/react-form'
 import { loginSchema } from '../../../schemas/auth/loginSchema'
 import type { LoginFormValues } from '../../../schemas/auth/loginSchema'
 import { login } from '../../../api/auth'
-import { email } from 'zod'
 import logo from '../../../assets/images/logo.png'
 import { zodValidator } from '../../../lib/validators'
 import { Input } from '../../ui/Input'
@@ -104,11 +103,28 @@ const LoginPage = () => {
 
         </form.Field>
 
-        <button type='submit' className='bg-violet py-3 cursor-pointer px-6 w-full text-white rounded-md capitalize font-bold'>
-            sign in
+        {serverError && (
+        <p className="mt-2 text-sm text-center text-red-400" role="alert">
+            {serverError}
+        </p>
+      )}
+
+       <form.Subscribe
+       selector={(state) => [state.isSubmitting]}
+       >
+        {([isSubmitting]) => (
+             <button disabled={isSubmitting} type='submit' className='bg-violet py-3 cursor-pointer px-6 w-full text-white rounded-md capitalize font-bold'>
+            {isSubmitting ? 'siging in ....' : 'sign in'}
         </button>
+        )}
+
+       </form.Subscribe>
 
       </form>
+
+      <p className="mt-8 text-center text-xs text-neutral-500">
+          Unbox Studio · Content Management
+    </p>
 
       
     </div>
