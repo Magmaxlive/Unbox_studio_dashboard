@@ -5,6 +5,7 @@ import { Route,Routes } from 'react-router-dom'
 import ProtectedRoutes from './components/auth/ProtectedRoutes'
 import DashboardPage from './components/pages/DashboardPage'
 import Unauthorized from './components/pages/Unauthorized'
+import NotFound from './components/pages/NotFound'
 
 function App() {
   
@@ -23,6 +24,9 @@ function App() {
       <Route element={<ProtectedRoutes allowedRoles={['admin']}/>}>
         <Route path='/admin/users'  element={<DashboardPage/>} />
       </Route>
+
+      {/* unknown routes */}
+      <Route path='*' element={<NotFound/>} />
 
     </Routes>
   )

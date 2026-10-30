@@ -42,9 +42,8 @@ const Unauthorized = () => {
       <main className='relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-16'>
         {/* Status badge */}
         <div className='mb-10 inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-transparentbg px-4 py-1.5 backdrop-blur-sm'>
-          <span className='relative flex h-2 w-2'>
-            <span className='absolute inline-flex h-full w-full animate-ping rounded-full bg-volt opacity-75' />
-            <span className='relative inline-flex h-2 w-2 rounded-full bg-volt' />
+          <span className='text-volt'>
+            <LockIcon size={15} />
           </span>
           <span className='font-body text-[11px] font-semibold uppercase tracking-[0.3em] text-soft'>
             Access Denied
