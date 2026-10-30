@@ -1,5 +1,7 @@
 
 @import "tailwindcss";
+@config "../tailwind.config.ts";
+
 
 @font-face {
   font-family: "Brachial";
@@ -71,6 +73,7 @@
   --color-edu: #18d641;
   --color-soft: rgb(255 255 255 / 0.78);
   --color-transparentbg:#ffffff14;
+  --color-lightbg:#EDE7FF;
 }
 
 body {
