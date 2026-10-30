@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState,useEffect,useRef } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { Bell,ChevronDown,User,Settings,Menu } from 'lucide-react'
 import LogoutButton from '../ui/LogoutButton'
@@ -11,6 +11,24 @@ interface HeaderProps{
 const Header = ({onMenuClick}:HeaderProps) => {
     const {user} = useAuth();
     const [profileOpen,setProfileOpen] = useState(false)
+    const profileRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+        if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+        ) {
+        setProfileOpen(false);
+        }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+    };
+    }, []);
   return (
     <div className='flex justify-between items-center border-b border-gray-200 bg-white h-20 px-4 md:px-8'>
             <div className="flex gap-2">
@@ -41,7 +59,7 @@ const Header = ({onMenuClick}:HeaderProps) => {
             </button>
 
             {/* profile */}
-            <div className="relative">
+            <div className="relative" ref={profileRef}>
                 <button type='button' onClick={()=>setProfileOpen(!profileOpen)} className="flex items-center gap-3 cursor-pointer rounded-xl p-2 transition hover:bg-gray-50">
                     
                         <div className="h-9 w-9 items-center flex justify-center text-sm rounded-full bg-violet text-white">
