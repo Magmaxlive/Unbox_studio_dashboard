@@ -16,9 +16,9 @@ const LogoutButton = () => {
         }
     }
   return (
-    <button onClick={handleLogout} className='w-full flex gap-3 bg-ink hover:bg-red-800 tracking-wide cursor-pointer rounded-md p-3 hover:text-white text-soft font-semibold capitalize'>
+    <button type='button' onClick={handleLogout} className='cursor-pointer font-semibold capitalize w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-500 transition hover:bg-white hover:text-red-600'>
       <LogOut/>
-      sign out
+      <span>Logout</span>
     </button>
   )
 }
