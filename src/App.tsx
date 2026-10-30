@@ -7,6 +7,7 @@ import DashboardPage from './components/pages/DashboardPage'
 import Unauthorized from './components/pages/Unauthorized'
 import NotFound from './components/pages/NotFound'
 import GuestRoute from './components/auth/GuestRoute'
+import DashboardLayout from './components/layout/DashboardLayout'
 
 function App() {
   
@@ -25,7 +26,9 @@ function App() {
 
       {/* Authenticated routes */}
       <Route element={<ProtectedRoutes/>}>
-        <Route path='/dashboard'  element={<DashboardPage/>} />
+        <Route element={<DashboardLayout/>}>
+            <Route path='/dashboard'  element={<DashboardPage/>} />
+        </Route>
       </Route>
 
       {/* Admin only */}
