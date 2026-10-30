@@ -81,8 +81,34 @@ const DashboardPage = () => {
       </div>
 
       {/* recent activity */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-xl p-5">
-        
+      <div className="bg-white flex flex-col gap-5 rounded-2xl border border-gray-200 shadow-xl p-5">
+        <div className="flex items center justify-between">
+
+          <div className="flex flex-col ">
+            <h3 className="text-xl font-bold capitalize text-ink">recent activity</h3>
+            <p className="text-sm text-gray-500 tracking-wide mt-1 capitalize"> Your latest content updates.</p>
+          </div>
+
+          <button className="flex items-center cursor-pointer capitalize gap-1 text-sm font-semibold text-violet hover:text-violet-deep">
+              view all <ArrowUpRight size={16}/>
+          </button>
+
+         
+        </div>
+         <div className="flex flex-col gap-1 text-center">
+              <div className="mx-auto  flex h-12 w-12 items-center justify-center rounded-full bg-[#EDE7FF] text-violet">
+                <Clock size={22} />
+              </div>
+
+              <p className="font-medium text-ink">
+                No recent activity
+              </p>
+
+              <p className="text-sm text-gray-500">
+                Your content activity will appear here.
+              </p>
+          </div>
+
       </div>
       
     </div>
