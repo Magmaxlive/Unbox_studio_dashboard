@@ -3,15 +3,19 @@ import { useState } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { loginSchema } from '../../../schemas/auth/loginSchema'
 import type { LoginFormValues } from '../../../schemas/auth/loginSchema'
-import { login } from '../../../api/auth'
 import logo from '../../../assets/images/logo.png'
 import { zodValidator } from '../../../lib/validators'
 import { Input } from '../../ui/Input'
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { useAuth } from '../../../contexts/AuthContext'
 
 
 
 const LoginPage = () => {
     const [serverError,setServerError] = useState("")
+    const navigate = useNavigate();
+    const {login} = useAuth();
 
     const form = useForm({
         defaultValues:{
@@ -30,10 +34,23 @@ const LoginPage = () => {
             // api call
             try {
                 await login(result.data.email,result.data.password);
-                alert("Login successfull")
                 form.reset()
+                navigate("/dashboard", { replace: true });
             } catch (error) {
-                setServerError("Unable to sign in . Check your credentials")
+                if (axios.isAxiosError(error)) {
+                console.log("Server error:", error.response?.data);
+                console.log("Status code:", error.response?.status);
+
+                const message =
+                    error.response?.data?.detail ||
+                    error.response?.data?.non_field_errors?.[0] ||
+                    error.message;
+
+                setServerError(message);
+            } else {
+                console.error("Unexpected error:", error);
+                setServerError("Something went wrong. Please try again.");
+            }
             }
 
         }

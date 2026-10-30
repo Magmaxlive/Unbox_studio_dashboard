@@ -6,14 +6,22 @@ import ProtectedRoutes from './components/auth/ProtectedRoutes'
 import DashboardPage from './components/pages/DashboardPage'
 import Unauthorized from './components/pages/Unauthorized'
 import NotFound from './components/pages/NotFound'
+import GuestRoute from './components/auth/GuestRoute'
 
 function App() {
   
 
   return (
     <Routes>
-      <Route path='/login' element={<LoginPage/>}  />
+
       <Route path='/unauthorized' element={<Unauthorized/>}  />
+
+      {/*guest route  */}
+      <Route element={<GuestRoute/>}>
+          <Route path='/login' element={<LoginPage/>}  />
+      </Route>
+      
+      
 
       {/* Authenticated routes */}
       <Route element={<ProtectedRoutes/>}>
