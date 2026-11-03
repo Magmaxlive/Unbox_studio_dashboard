@@ -37,3 +37,35 @@ export function useCreateCategory(){
         }
     })
 }
+
+// update category
+export function useUpdateCategory(){
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn : ({id,data}:{id:string,data:Partial<CategoryPayload>}) => updateCategory(id,data),
+        onSuccess : (_,variables) => {
+            queryClient.invalidateQueries({
+                queryKey : categoryKeys.all
+            });
+
+            queryClient.invalidateQueries({
+                queryKey : categoryKeys.detail(variables.id)
+            });
+        }
+
+    });
+}
+
+// delete category
+export function useDeleteCategory(){
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn : (id:string) => deleteCategory(id),
+        onSuccess : ()=>{
+            queryClient.invalidateQueries({
+                queryKey : categoryKeys.all,
+            })
+        }
+    })
+}
