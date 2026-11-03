@@ -1,5 +1,7 @@
 import api from "./axios";
 import { clearCsrfToken,getCsrfHeaders } from "./csrf";
+import { refreshSession } from "./refresh";
+export { refreshSession };
 
 // user type
 export interface AuthUser{
@@ -33,11 +35,6 @@ export async function getCurrentUser(): Promise<AuthUser> {
     return response.data;
 }
 
-// refresh token api call
-export async function refreshSession() : Promise<void> {
-    const headers = await getCsrfHeaders();
-    await api.post('/auth/token/refresh',{},{headers})
-}
 
 // logout api call
 export async function logout():Promise<void> {
