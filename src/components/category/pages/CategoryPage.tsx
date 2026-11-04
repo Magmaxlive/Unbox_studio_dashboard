@@ -6,6 +6,7 @@ import CategoryForm from '../CategoryForm';
 import { useAuth } from '../../../contexts/AuthContext';
 import { handleMutationError } from '../../../utlis/handleMutationError';
 import { toast } from 'sonner';
+import ConfirmDialog from '../../ui/ConfirmDialog';
 
 
 const CategoryPage = () => {
@@ -13,6 +14,7 @@ const CategoryPage = () => {
     const isAdmin = user?.role === 'admin'
 
     const [isFormOpen,setIsFormOpen] = useState(false)
+    const [categoryToDelete,setCategoryToDelete] = useState<string|null>(null)
     const [apiFieldErrors, setApiFieldErrors] = useState<Record<string, string>>({});
     const [selectedCategory,setSelectedCategory] = useState<Category|null>(null)
     const {
@@ -37,6 +39,25 @@ const CategoryPage = () => {
     const handleEdit = (category:Category) => {
         setSelectedCategory(category)
         setIsFormOpen(true)
+    }
+
+    const handleDelete = (id:string) => {
+        setCategoryToDelete(id)
+    }
+
+    const handleConfirmDelete =()=>{
+        if (!categoryToDelete) return ;
+
+        deleteMutation.mutate(categoryToDelete,{
+            onSuccess : ()=>{
+                toast.success('Categroy Deleted successfully');
+                setCategoryToDelete(null)
+            },
+            onError : (error)=>{
+                handleMutationError(error);
+                setCategoryToDelete(null)
+            }
+        })
     }
 
     const handleCloseForm = ()=>{
@@ -95,8 +116,26 @@ const CategoryPage = () => {
                 <button type='button' onClick={handleCreate} className="cursor-pointer rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700 capitalize">+ create category</button>
             }
         </div>
-        <CategoryList categories={categories} handleEdit={handleEdit} />
-        <CategoryForm apiFieldErrors={apiFieldErrors} isOpen={isFormOpen} category={selectedCategory} isSubmitting={isSubmitting} onClose={handleCloseForm} onSubmit={handleSubmit} />
+        <CategoryList categories={categories} handleEdit={handleEdit} onDelete={handleDelete} />
+
+        <CategoryForm 
+            apiFieldErrors={apiFieldErrors} 
+            isOpen={isFormOpen} 
+            category={selectedCategory} 
+            isSubmitting={isSubmitting} 
+            onClose={handleCloseForm} 
+            onSubmit={handleSubmit}
+         />
+
+        <ConfirmDialog 
+            isOpen={!!categoryToDelete} 
+            description='Are you sure you want to delete this category? This action cannot be undone' 
+            title='delete category ?' 
+            confirmText='delete category'
+            isLoading={deleteMutation.isPending}
+            onConfirm={handleConfirmDelete}
+            onClose={()=>setCategoryToDelete(null)} 
+        />
     </div>
   )
 }

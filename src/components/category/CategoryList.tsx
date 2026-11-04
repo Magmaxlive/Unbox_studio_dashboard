@@ -5,9 +5,10 @@ import { useAuth } from '../../contexts/AuthContext';
 interface CategoryListProps{
   categories : Category[];
   handleEdit : (category:Category) => void;
+  onDelete : (id:string) => void;
 }
 
-const CategoryList = ({categories,handleEdit}:CategoryListProps) => {
+const CategoryList = ({categories,handleEdit,onDelete}:CategoryListProps) => {
   const {user} = useAuth();
   const isAdmin = user?.role === 'admin';
 
@@ -88,7 +89,7 @@ const CategoryList = ({categories,handleEdit}:CategoryListProps) => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => console.log("Delete category", category.id)}
+                    onClick={() => onDelete(category.id)}
                     className="rounded-lg border cursor-pointer border-red-100 px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-600 hover:text-white"
                   >
                     Delete
