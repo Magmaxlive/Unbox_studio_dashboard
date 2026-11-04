@@ -13,17 +13,24 @@ const CategoryPage = () => {
     const {user} = useAuth();
     const isAdmin = user?.role === 'admin'
 
+    const [currentPage,setCurrentPage] = useState(1);
     const [isFormOpen,setIsFormOpen] = useState(false)
     const [categoryToDelete,setCategoryToDelete] = useState<string|null>(null)
     const [apiFieldErrors, setApiFieldErrors] = useState<Record<string, string>>({});
     const [selectedCategory,setSelectedCategory] = useState<Category|null>(null)
     const {
-        data: categories = [],
+        data,
         isLoading,
         isError,
         error,
         refetch
     } = useCategories();
+
+
+    const categories = data?.results ?? []
+    const totalCount = data?.count ?? 0
+    const nextPage = data?.next;
+    const previousPage = data?.previous;
 
     const createMutation = useCreateCategory();
     const updateMutation = useUpdateCategory();

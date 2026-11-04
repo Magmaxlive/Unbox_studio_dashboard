@@ -1,9 +1,13 @@
 import type { Category,CategoryPayload } from "../types/Category";
 import api from "./axios";
+import type { PaginatedResponse } from "../types/PaginatedResponse";
 
 // get category
-export async function getCategories(): Promise<Category[]> {
-    const response = await api.get<Category[]>('/category/');
+export async function getCategories(page = 1): Promise<PaginatedResponse<Category>> {
+    const response = await api.get<PaginatedResponse<Category>>('/category/',{
+        params : {page}
+    });
+
     return response.data;
 }
 

@@ -8,10 +8,10 @@ export const categoryKeys = {
 }
 
 // fetch all categories
-export function useCategories(){
+export function useCategories(page = 1){
     return useQuery({
-        queryKey : categoryKeys.all,
-        queryFn : getCategories,
+        queryKey : [...categoryKeys.all,page],
+        queryFn : ()=> getCategories(page),
     });
 }
 
