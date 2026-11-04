@@ -13,6 +13,7 @@ interface CategoryFormProps {
     onSubmit:(data:CategoryPayload) => void;
     isSubmitting? : boolean;
     apiFieldErrors : Record<string, string>;
+   
 }
 
 const defaultValues : CategoryPayload = {

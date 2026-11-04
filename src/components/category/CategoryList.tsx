@@ -4,9 +4,10 @@ import { useAuth } from '../../contexts/AuthContext';
 
 interface CategoryListProps{
   categories : Category[];
+  handleEdit : (category:Category) => void;
 }
 
-const CategoryList = ({categories}:CategoryListProps) => {
+const CategoryList = ({categories,handleEdit}:CategoryListProps) => {
   const {user} = useAuth();
   const isAdmin = user?.role === 'admin';
 
@@ -51,7 +52,7 @@ const CategoryList = ({categories}:CategoryListProps) => {
           </div>
 
           {/* description */}
-          <div className="mt-4 min-h-10 text-sm leading-5 text-gray-600">
+          <div className="mt-4 min-h-10 flex-1 text-sm leading-5 text-gray-600">
             {category.description || 'Not description provided.'}
           </div>
 
@@ -67,7 +68,7 @@ const CategoryList = ({categories}:CategoryListProps) => {
 
           {/* footer */}
 
-            <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+            <div className="fixed-bottom flex items-center justify-between border-t border-gray-100 pt-4">
               <div className="flex items-center gap-2">
                  <span
                     className="size-3 rounded-full border border-black/10"
@@ -82,7 +83,7 @@ const CategoryList = ({categories}:CategoryListProps) => {
 
               {isAdmin && (
                 <div className="flex items-center gap-2">
-                  <button type='button' onClick={()=> console.log('Edit category',category.id)} className="rounded-lg border border-gray-200 cursor-pointer px-3 py-1.5 text-sm font-medium text-blue-700 transition hover:bg-blue-700 hover:text-white">
+                  <button type='button' onClick={()=> handleEdit(category)} className="rounded-lg border border-gray-200 cursor-pointer px-3 py-1.5 text-sm font-medium text-blue-700 transition hover:bg-blue-700 hover:text-white">
                     Edit
                   </button>
                   <button
