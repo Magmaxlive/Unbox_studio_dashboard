@@ -6,6 +6,7 @@ export interface Category{
     color_hex : string;
     text_color_hex : string;
     created_by : string;
+    created_by_name : string;
     created_at : string;
     updated_at : string;
     description : string;

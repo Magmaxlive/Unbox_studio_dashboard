@@ -1,11 +1,15 @@
 import React from 'react'
 import type { Category } from '../../types/Category'
+import { useAuth } from '../../contexts/AuthContext';
 
 interface CategoryListProps{
   categories : Category[];
 }
 
 const CategoryList = ({categories}:CategoryListProps) => {
+  const {user} = useAuth();
+  const isAdmin = user?.role === 'admin';
+
   if (!categories.length) return (
     <div className="rounded-xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center">
       <h3 className="font-semibold text-gray-900">No categories found</h3>
@@ -51,8 +55,19 @@ const CategoryList = ({categories}:CategoryListProps) => {
             {category.description || 'Not description provided.'}
           </div>
 
+          {/* created by
+          {isAdmin && (
+            <p className="py-2 border-t border-gray-100 text-xs flex justify-between text-gray-500 text-right">
+              Created by  <span className="font-medium text-gray-600">
+                {category.created_by_name}
+              </span>
+            </p>
+          )} */}
+
+
           {/* footer */}
-            <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
+
+            <div className="flex items-center justify-between border-t border-gray-100 pt-4">
               <div className="flex items-center gap-2">
                  <span
                     className="size-3 rounded-full border border-black/10"
@@ -63,18 +78,25 @@ const CategoryList = ({categories}:CategoryListProps) => {
                   </span>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button type='button' onClick={()=> console.log('Edit category',category.id)} className="rounded-lg border border-gray-200 cursor-pointer px-3 py-1.5 text-sm font-medium text-blue-700 transition hover:bg-blue-700 hover:text-white">
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  onClick={() => console.log("Delete category", category.id)}
-                  className="rounded-lg border cursor-pointer border-red-100 px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-600 hover:text-white"
-                >
-                  Delete
-                </button>
-              </div>
+              
+
+              {isAdmin && (
+                <div className="flex items-center gap-2">
+                  <button type='button' onClick={()=> console.log('Edit category',category.id)} className="rounded-lg border border-gray-200 cursor-pointer px-3 py-1.5 text-sm font-medium text-blue-700 transition hover:bg-blue-700 hover:text-white">
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => console.log("Delete category", category.id)}
+                    className="rounded-lg border cursor-pointer border-red-100 px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-600 hover:text-white"
+                  >
+                    Delete
+                  </button>
+                </div>
+                )
+              }
+
+              
             </div>
         </div>
       ))}
