@@ -11,7 +11,7 @@ interface ModalProps{
     maxWidth?:string
 }
 
-const Modal = ({isOpen,onClose,title,description,children,maxWidth}:ModalProps) => {
+const Modal = ({isOpen,onClose,title,description,children,maxWidth= "max-w-lg"}:ModalProps) => {
     useEffect(()=>{
         if (!isOpen) return;
 
@@ -31,8 +31,8 @@ const Modal = ({isOpen,onClose,title,description,children,maxWidth}:ModalProps) 
     if (!isOpen) return null;
 
     return (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur[2px]' onMouseDown={(event)=>{ if (event.target === event.currentTarget) onClose() }}>
-            <div role='dialog' aria-modal='true' aria-labelledby='modal-title' className={`w-full ${maxWidth} animate-in fade-in zoom-in-95 rounded-2xl bg-white shadow-2xl`}>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]'>
+            <div role='dialog' aria-modal='true' aria-labelledby='modal-title' className={`w-full ${maxWidth} flex flex-col animate-in fade-in zoom-in-95 rounded-2xl bg-white shadow-2xl max-h-[90vh] overflow-hidden`}>
                 <div className="flex items-start justify-between border-b border-gray-100 px-6 py-5">
                     <div>
                         <h2 id='modal-title' className="text-lg font-semibold text-gray-900">
@@ -45,13 +45,14 @@ const Modal = ({isOpen,onClose,title,description,children,maxWidth}:ModalProps) 
                             </p>
                         )}
 
-                        <button className="rounded-lg p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700">
-                            <X size={18} />
-                        </button>
+                        
                     </div>
 
-                    <div className="px-6 py-5">{children}</div>
+                   <button className="rounded-lg cursor-pointer p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700" onClick={onClose}>
+                            <X size={18} />
+                    </button>
                 </div>
+                 <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-4">{children}</div>
             </div>
         </div>
     )

@@ -12,6 +12,7 @@ interface CategoryFormProps {
     category? : Category | null;
     onSubmit:(data:CategoryPayload) => void;
     isSubmitting? : boolean;
+    apiFieldErrors : Record<string, string>;
 }
 
 const defaultValues : CategoryPayload = {
@@ -23,7 +24,7 @@ const defaultValues : CategoryPayload = {
     is_active : true
 }
 
-const CategoryForm = ({isOpen,onClose,category,onSubmit,isSubmitting=false}: CategoryFormProps) => {
+const CategoryForm = ({apiFieldErrors,isOpen,onClose,category,onSubmit,isSubmitting=false}: CategoryFormProps) => {
     const isEditing = Boolean(category)
 
     const form = useForm({
@@ -66,8 +67,11 @@ const CategoryForm = ({isOpen,onClose,category,onSubmit,isSubmitting=false}: Cat
                     <div>
                         <label htmlFor="name" className="mb-1 5 block text-sm font-medium text-gray-700 capitalize">category name</label>
                         <input type="text" className="w-full rounded-lg border border-gray-200 px-3 py-2 5 text-sm outline-none focus" value={field.state.value} placeholder='eg. Politics' onChange={(e)=>field.handleChange(e.target.value)} onBlur={field.handleBlur} />
-                        {field.state.meta.errors.map((error)=>(
-                            <p key={String(error)} className='mt-1 text-xs text-red-500'>{String(error)}</p>
+
+                         {field.state.meta.errors.map((error, index) => (
+                            <p key={index} className="mt-2 text-xs text-red-500">
+                            {typeof error === "string" ? error : error?.message}
+                            </p>
                         ))}
                     </div>
                 )}
@@ -80,8 +84,11 @@ const CategoryForm = ({isOpen,onClose,category,onSubmit,isSubmitting=false}: Cat
                     <div>
                         <label htmlFor="description" className="mb-1 5 block text-sm font-medium text-gray-700 capitalize">description</label>
                         <textarea rows={3} value={field.state.value} placeholder="Describe this category..." onBlur={field.handleBlur} onChange={(e)=>field.handleChange(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 5 text-sm outline-none focus" />
-                        {field.state.meta.errors.map((error)=>(
-                            <p key={String(error)} className='mt-1 text-xs text-red-500'>{String(error)}</p>
+                            
+                         {field.state.meta.errors.map((error, index) => (
+                            <p key={index} className="mt-2 text-xs text-red-500">
+                            {typeof error === "string" ? error : error?.message}
+                            </p>
                         ))}
                     </div>
                 )}
@@ -92,9 +99,12 @@ const CategoryForm = ({isOpen,onClose,category,onSubmit,isSubmitting=false}: Cat
                 {(field)=>(
                     <div>
                         <label htmlFor="color_name" className="mb-1 5 block text-sm font-medium text-gray-700 capitalize">color name</label>
-                        <input type="text" className="w-full rounded-lg border border-gray-200 px-3 py-2 5 text-sm outline-none focus" value={field.state.value} placeholder='eg. Politics' onChange={(e)=>field.handleChange(e.target.value)} onBlur={field.handleBlur} />
-                        {field.state.meta.errors.map((error)=>(
-                            <p key={String(error)} className='mt-1 text-xs text-red-500'>{String(error)}</p>
+                        <input type="text" className="w-full rounded-lg border border-gray-200 px-3 py-2 5 text-sm outline-none focus" value={field.state.value} placeholder='Deep violet' onChange={(e)=>field.handleChange(e.target.value)} onBlur={field.handleBlur} />
+
+                        {field.state.meta.errors.map((error, index) => (
+                            <p key={index} className="mt-2 text-xs text-red-500">
+                            {typeof error === "string" ? error : error?.message}
+                            </p>
                         ))}
                     </div>
                 )}
@@ -121,12 +131,18 @@ const CategoryForm = ({isOpen,onClose,category,onSubmit,isSubmitting=false}: Cat
                         className="flex-1 rounded-lg border border-gray-200 px-3 py-2.5 text-sm uppercase outline-none focus:border-gray-900"
                         />
                     </div>
+
+                     {field.state.meta.errors.map((error, index) => (
+                            <p key={index} className="mt-2 text-xs text-red-500">
+                            {typeof error === "string" ? error : error?.message}
+                            </p>
+                        ))}
                 </div>
             )}
             </form.Field>
 
             {/* text color */}
-            {/* bg color */}
+           
             <form.Field name="text_color_hex">
             {(field) => (
                 <div>
@@ -147,6 +163,18 @@ const CategoryForm = ({isOpen,onClose,category,onSubmit,isSubmitting=false}: Cat
                         className="flex-1 rounded-lg border border-gray-200 px-3 py-2.5 text-sm uppercase outline-none focus:border-gray-900"
                         />
                     </div>
+
+                     {field.state.meta.errors.map((error, index) => (
+                            <p key={index} className="mt-1 text-xs text-red-500">
+                            {typeof error === "string" ? error : error?.message}
+                            </p>
+                        ))}
+
+                    {apiFieldErrors.text_color_hex && (
+                        <p className="text-xs text-red-600 mt-1">
+                            {apiFieldErrors.text_color_hex}
+                        </p>
+                    )}
                 </div>
             )}
             </form.Field>
@@ -206,14 +234,14 @@ const CategoryForm = ({isOpen,onClose,category,onSubmit,isSubmitting=false}: Cat
 
             {/* actions */}
 
-            <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
-                <button type='button' onClick={onClose} disabled={isSubmitting} className='rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-medium capitalize text-gray-600 hover:bg-gray-50'>
+            <div className="flex shrink-0 justify-end gap-3 border-t border-gray-100 pt-4 bg-white">
+                <button type='button' onClick={onClose} disabled={isSubmitting} className='cursor-pointer rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-medium capitalize text-gray-600 hover:bg-gray-50'>
                     cancel
                 </button>
 
                 <form.Subscribe selector={(state)=>state.canSubmit}>
                     {(canSubmit)=> (
-                        <button type='submit' disabled={!canSubmit || isSubmitting} className="rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50">
+                        <button type='submit' disabled={!canSubmit || isSubmitting} className="cursor-pointer rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50">
                             {isSubmitting ? 'Saving' : isEditing ? 'Save changes':'Create category'}
                         </button>
                     )}
