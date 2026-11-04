@@ -1,25 +1,31 @@
 import React, { useEffect, useState } from 'react'
 import type { Category } from '../../../types/Category'
-import { getCategories } from '../../../api/categories'
+import { useCategories } from '../../../hooks/queries/categories';
+import CategoryList from '../CategoryList';
 
 const CategoryPage = () => {
-    const [categories,setCategories] = useState<Category[]>([]);
-    const [loading,setLoading] = useState(true)
+    const {
+        data: categories = [],
+        isLoading,
+        isError,
+        error,
+        refetch
+    } = useCategories();
 
-    useEffect(()=>{
-        async function fetchCategories() {
-            try{
-                const data = await getCategories();
-                return data
-            }finally{
-                
-            }
-        }
-    },[])
+    if (isLoading) return <p>Loading categories...</p>
+
+    if (isError){
+        return(
+            <div>
+                <p>{error.message || 'Failed to load categories.'}</p>
+                <button onClick={()=>refetch()}>Retry</button>
+            </div>
+        )
+    }
   return (
-    <div>
-        <h1 className="font-bold text-2xl sm:text-3xl  capitalize">categories</h1>
-      
+    <div className='flex flex-col gap-8'>
+        <h1 className="font-bold text-2xl sm:text-3xl capitalize">categories</h1>
+        <CategoryList categories={categories} />
     </div>
   )
 }
