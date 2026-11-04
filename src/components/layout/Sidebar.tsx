@@ -3,15 +3,9 @@ import { Link,useLocation } from 'react-router-dom'
 import {LayoutDashboard,Video,FileText,Tags,Users,Settings,X} from 'lucide-react'
 import logo from '../../assets/images/logo.png'
 import LogoutButton from '../ui/LogoutButton';
+import { useAuth } from '../../contexts/AuthContext';
 
-const menuItems = [
-  { label: "Overview", path: "/dashboard", icon: LayoutDashboard },
-  { label: "Videos", path: "/videos", icon: Video },
-  { label: "Blogs", path: "/blogs", icon: FileText },
-  { label: "Categories", path: "/categories", icon: Tags },
-  { label: "Users", path: "/users", icon: Users },
-  { label: "Settings", path: "/settings", icon: Settings },
-];
+
 
 interface SidebarProps{
     isOpen:boolean
@@ -20,6 +14,17 @@ interface SidebarProps{
 
 const Sidebar = ({isOpen,onClose}:SidebarProps) => {
     const location = useLocation()
+    const {user} = useAuth();
+    const isAdmin = user?.role === 'admin'
+
+    const menuItems = [
+    { label: "Overview", path: "/dashboard", icon: LayoutDashboard },
+    { label: isAdmin ? "Videos" : "My videos", path: "/videos", icon: Video },
+    { label: isAdmin ? "Blogs" : "My Blogs", path: "/blogs", icon: FileText },
+    { label: "Categories", path: "/categories", icon: Tags },
+    ...(isAdmin ?[{ label: "Users", path: "/users", icon: Users },] : []),
+    { label: "Settings", path: "/settings", icon: Settings },
+  ];
   return (
     <>
     {isOpen && (

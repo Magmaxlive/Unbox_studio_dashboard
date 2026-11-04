@@ -8,6 +8,7 @@ import Unauthorized from './components/pages/Unauthorized'
 import NotFound from './components/pages/NotFound'
 import GuestRoute from './components/auth/GuestRoute'
 import DashboardLayout from './components/layout/DashboardLayout'
+import CategoryPage from './components/category/pages/CategoryPage'
 
 function App() {
   
@@ -28,6 +29,7 @@ function App() {
       <Route element={<ProtectedRoutes/>}>
         <Route element={<DashboardLayout/>}>
             <Route path='/dashboard'  element={<DashboardPage/>} />
+            <Route path='/categories'  element={<CategoryPage/>} />
         </Route>
       </Route>
 
