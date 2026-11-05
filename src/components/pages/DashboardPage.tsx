@@ -1,5 +1,4 @@
-import React from 'react'
-import LogoutButton from '../ui/LogoutButton'
+
 import { useAuth } from '../../contexts/AuthContext'
 import {
   Video,

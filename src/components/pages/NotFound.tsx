@@ -1,5 +1,4 @@
-import React from 'react'
-import { ArrowLeft,LockIcon, Home, ShieldOff } from 'lucide-react'
+import { ArrowLeft, Home, ShieldOff } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import logo from '../../assets/images/logo.png'
 

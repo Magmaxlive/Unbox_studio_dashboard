@@ -1,8 +1,7 @@
-import React from 'react'
+
 import { Link,useLocation } from 'react-router-dom'
 import {LayoutDashboard,Video,FileText,Tags,Users,Settings,X} from 'lucide-react'
 import logo from '../../assets/images/logo.png'
-import LogoutButton from '../ui/LogoutButton';
 import { useAuth } from '../../contexts/AuthContext';
 
 

@@ -32,8 +32,6 @@ const CategoryPage = () => {
 
     const categories = data?.results ?? []
     const totalCount = data?.count ?? 0
-    const nextPage = data?.next;
-    const previousPage = data?.previous;
     const PAGE_SIZE = 12;
     const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
