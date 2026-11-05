@@ -1,12 +1,15 @@
 import {useMutation,useQuery,useQueryClient} from '@tanstack/react-query'
-import { getCategories,createCategory,retrieveCategory,updateCategory,deleteCategory } from '../../api/categories'
+import { getCategories,getCategoryOption,createCategory,retrieveCategory,updateCategory,deleteCategory } from '../../api/categories'
 import type { CategoryPayload } from '../../types/Category'
+import { data } from 'react-router-dom';
 
 export const categoryKeys = {
     all: ["categories"] as const,
 
   lists: () => [...categoryKeys.all, "list"] as const,
   list: (page: number) => [...categoryKeys.lists(), page] as const,
+
+  options:()=> [...categoryKeys.lists(),'options'] as const,
 
   details: () => [...categoryKeys.all, "detail"] as const,
   detail: (id: string) => [...categoryKeys.details(), id] as const,
@@ -18,6 +21,16 @@ export function useCategories(page = 1){
         queryKey : categoryKeys.list(page),
         queryFn : ()=> getCategories(page),
     });
+}
+
+// fetch all categoryOption
+export function useCategoryOptions(){
+    return useQuery({
+        queryKey : categoryKeys.options(),
+        queryFn : ()=> getCategoryOption(),
+        select : (data) => data.results,
+        staleTime : 5*60*1000,
+    })
 }
 
 // fetch single category
