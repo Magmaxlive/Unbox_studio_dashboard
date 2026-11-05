@@ -98,7 +98,9 @@ const CategoryPage = () => {
             createMutation.mutate(data,{
                 onSuccess : ()=>{
                     toast.success('Category Added successfully')
-                   handleCloseForm() 
+                    setCurrentPage(1);
+                    handleCloseForm() 
+                  
                 } ,
                 onError: (error) => {
                 handleMutationError(error, {
