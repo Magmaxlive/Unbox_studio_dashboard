@@ -11,6 +11,15 @@ export async function getCategories(page = 1): Promise<PaginatedResponse<Categor
     return response.data;
 }
 
+// get all categories in one request (used by dropdowns of blog,video)
+export async function getCategoryOption():Promise<PaginatedResponse<Category>> {
+    const response = await api.get<PaginatedResponse<Category>>('/category/',{
+        params : {page_size : 100}
+    });
+    return response.data
+    
+}
+
 // create category
 export async function createCategory(data : CategoryPayload): Promise<Category>{
     const response = await api.post<Category>('/category/',data);

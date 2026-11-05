@@ -1,4 +1,3 @@
-import React from 'react'
 import type { Category } from '../../types/Category'
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -21,7 +20,7 @@ const CategoryList = ({categories,handleEdit,onDelete}:CategoryListProps) => {
     </div>
   )
   return (
-    <div className='grid grid-cols-1 md:grid-cols-2 tablet:grid-cols-3 lg:grid-cols-4 gap-4'>
+    <div className='grid grid-cols-1 sm:grid-cols-2 tablet:grid-cols-3 lg:grid-cols-4 gap-4'>
       {categories.map((category)=>(
         <div key={category.id} className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md flex flex-col gap-2">
           {/* category header */}

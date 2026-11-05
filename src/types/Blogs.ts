@@ -1,9 +1,26 @@
 export type BlogStatus = | "draft" | "pending" | "published" | "rejected" | "archived";
 
+export interface BlogFilter{
+    page?:number;
+    status?:BlogStatus;
+    category?:string;
+    search?:string;
+    ordering?:string
+}
+
+export interface BlogCategorySummary{
+    id:string;
+    name:string;
+    color_hex:string;
+    text_color_hex:string;
+}
+
 export interface Blog{
     id : string;
     contributor : string;
+    contributor_name : string;
     category : string | null;
+    category_detail: BlogCategorySummary | null;
     title : string;
     slug : string;
     content : string;

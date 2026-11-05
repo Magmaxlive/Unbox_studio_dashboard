@@ -20,4 +20,5 @@ export interface CategoryPayload{
     color_hex : string;
     text_color_hex : string;
     is_active : boolean;
+    slug? : string;
 }

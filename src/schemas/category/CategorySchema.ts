@@ -6,5 +6,6 @@ export const categorySchema = z.object({
     color_name : z.string().trim().min(1,'Color name is required'),
     color_hex: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Enter a valid hex color"),
     text_color_hex : z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Enter a valid hex color"),
-    is_active : z.boolean()
+    is_active : z.boolean(),
+    slug:z.string().trim(),
 })

@@ -1,10 +1,10 @@
 import api from "./axios";
 import type { PaginatedResponse } from "../types/PaginatedResponse";
-import type { Blog,BlogPayload } from "../types/Blogs";
+import type { Blog,BlogPayload,BlogFilter } from "../types/Blogs";
 
 // fetch blogs
-export async function getBlogs(page = 1) : Promise<PaginatedResponse<Blog>> {
-    const response = await api.get<PaginatedResponse<Blog>>('/blogs/',{params:page});
+export async function getBlogs(filters: BlogFilter = {}) : Promise<PaginatedResponse<Blog>> {
+    const response = await api.get<PaginatedResponse<Blog>>('/blogs/',{params:filters});
     return response.data;
 }
 

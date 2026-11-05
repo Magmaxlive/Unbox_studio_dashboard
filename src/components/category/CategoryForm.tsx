@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import type { Category,CategoryPayload } from '../../types/Category'
 import { categorySchema } from '../../schemas/category/CategorySchema'
 import { useForm } from '@tanstack/react-form';
 import Modal from '../ui/Modal';
-import { string } from 'zod/mini';
+import { getErrorMessage } from '../../utlis/getErrorMessage';
 
 
 interface CategoryFormProps {
@@ -22,6 +22,7 @@ const defaultValues : CategoryPayload = {
     color_name : "",
     color_hex : "",
     text_color_hex : "",
+    slug: "",
     is_active : true
 }
 
@@ -35,7 +36,8 @@ const CategoryForm = ({apiFieldErrors,isOpen,onClose,category,onSubmit,isSubmitt
             color_name : category.color_name ?? '',
             color_hex : category.color_hex,
             text_color_hex : category.text_color_hex,
-            is_active : category.is_active
+            is_active : category.is_active,
+            slug : category.slug,
         } : defaultValues,
         validators : {
             onSubmit: categorySchema,
@@ -54,7 +56,8 @@ const CategoryForm = ({apiFieldErrors,isOpen,onClose,category,onSubmit,isSubmitt
                     color_name : category.color_name ?? '',
                     color_hex : category.color_hex,
                     text_color_hex : category.text_color_hex,
-                    is_active : category.is_active
+                    is_active : category.is_active,
+                    slug : category.slug,
                 } : defaultValues
             );
         }
@@ -71,12 +74,54 @@ const CategoryForm = ({apiFieldErrors,isOpen,onClose,category,onSubmit,isSubmitt
 
                          {field.state.meta.errors.map((error, index) => (
                             <p key={index} className="mt-2 text-xs text-red-500">
-                            {typeof error === "string" ? error : error?.message}
+                            {getErrorMessage(error)}
                             </p>
                         ))}
+                        {apiFieldErrors.name && (
+                                <p className="text-xs text-red-600 mt-1">
+                                    {apiFieldErrors.name}
+                                </p>
+                        )}
                     </div>
                 )}
             </form.Field>
+
+            {isEditing ? (
+                <form.Field name="slug">
+                    {(field) => (
+                        <div>
+                            <label
+                                htmlFor="slug"
+                                className="mb-1 block text-sm font-medium text-gray-700"
+                            >
+                                Category Slug
+                            </label>
+
+                            <input
+                                id="slug"
+                                type="text"
+                                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                value={field.state.value}
+                                placeholder="e.g. education"
+                                onChange={(e) => field.handleChange(e.target.value)}
+                                onBlur={field.handleBlur}
+                            />
+
+                            {field.state.meta.errors.map((error, index) => (
+                                <p key={index} className="mt-2 text-xs text-red-500">
+                                    {getErrorMessage(error)}
+                                </p>
+                            ))}
+
+                             {apiFieldErrors.slug && (
+                                <p className="text-xs text-red-600 mt-1">
+                                    {apiFieldErrors.slug}
+                                </p>
+                            )}
+                        </div>
+                    )}
+                </form.Field>
+            ) : null}
 
             {/* description */}
 
@@ -88,7 +133,7 @@ const CategoryForm = ({apiFieldErrors,isOpen,onClose,category,onSubmit,isSubmitt
                             
                          {field.state.meta.errors.map((error, index) => (
                             <p key={index} className="mt-2 text-xs text-red-500">
-                            {typeof error === "string" ? error : error?.message}
+                            {getErrorMessage(error)}
                             </p>
                         ))}
                     </div>
@@ -104,7 +149,7 @@ const CategoryForm = ({apiFieldErrors,isOpen,onClose,category,onSubmit,isSubmitt
 
                         {field.state.meta.errors.map((error, index) => (
                             <p key={index} className="mt-2 text-xs text-red-500">
-                            {typeof error === "string" ? error : error?.message}
+                            {getErrorMessage(error)}
                             </p>
                         ))}
                     </div>
@@ -135,7 +180,7 @@ const CategoryForm = ({apiFieldErrors,isOpen,onClose,category,onSubmit,isSubmitt
 
                      {field.state.meta.errors.map((error, index) => (
                             <p key={index} className="mt-2 text-xs text-red-500">
-                            {typeof error === "string" ? error : error?.message}
+                            {getErrorMessage(error)}
                             </p>
                         ))}
                 </div>
@@ -167,7 +212,7 @@ const CategoryForm = ({apiFieldErrors,isOpen,onClose,category,onSubmit,isSubmitt
 
                      {field.state.meta.errors.map((error, index) => (
                             <p key={index} className="mt-1 text-xs text-red-500">
-                            {typeof error === "string" ? error : error?.message}
+                            {getErrorMessage(error)}
                             </p>
                         ))}
 

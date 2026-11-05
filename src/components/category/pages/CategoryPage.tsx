@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { Category, CategoryPayload } from '../../../types/Category'
 import { useCategories,useCreateCategory,useUpdateCategory,useDeleteCategory } from '../../../hooks/queries/categories';
 import CategoryList from '../CategoryList';
@@ -8,6 +8,7 @@ import { handleMutationError } from '../../../utlis/handleMutationError';
 import { toast } from 'sonner';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Pagination from '../../ui/Pagination';
+import CreateButton from '../../ui/CreateButton';
 
 
 const CategoryPage = () => {
@@ -31,8 +32,6 @@ const CategoryPage = () => {
 
     const categories = data?.results ?? []
     const totalCount = data?.count ?? 0
-    const nextPage = data?.next;
-    const previousPage = data?.previous;
     const PAGE_SIZE = 12;
     const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
@@ -123,10 +122,10 @@ const CategoryPage = () => {
     }
   return (
     <div className='flex flex-col gap-8'>
-        <div className="flex justify-between gap-4">
+        <div className="flex justify-between items-center gap-4">
             <h1 className="font-bold text-2xl sm:text-3xl capitalize">categories</h1>
             {isAdmin && 
-                <button type='button' onClick={handleCreate} className="cursor-pointer rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700 capitalize">+ create category</button>
+                <CreateButton handleCreate={handleCreate} title='create category' />
             }
         </div>
         <CategoryList categories={categories} handleEdit={handleEdit} onDelete={handleDelete} />
