@@ -7,6 +7,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { handleMutationError } from '../../../utlis/handleMutationError';
 import { toast } from 'sonner';
 import ConfirmDialog from '../../ui/ConfirmDialog';
+import Pagination from '../../ui/Pagination';
 
 
 const CategoryPage = () => {
@@ -23,14 +24,17 @@ const CategoryPage = () => {
         isLoading,
         isError,
         error,
-        refetch
-    } = useCategories();
+        refetch,
+        isFetching
+    } = useCategories(currentPage);
 
 
     const categories = data?.results ?? []
     const totalCount = data?.count ?? 0
     const nextPage = data?.next;
     const previousPage = data?.previous;
+    const PAGE_SIZE = 12;
+    const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
     const createMutation = useCreateCategory();
     const updateMutation = useUpdateCategory();
@@ -94,7 +98,9 @@ const CategoryPage = () => {
             createMutation.mutate(data,{
                 onSuccess : ()=>{
                     toast.success('Category Added successfully')
-                   handleCloseForm() 
+                    setCurrentPage(1);
+                    handleCloseForm() 
+                  
                 } ,
                 onError: (error) => {
                 handleMutationError(error, {
@@ -142,6 +148,14 @@ const CategoryPage = () => {
             isLoading={deleteMutation.isPending}
             onConfirm={handleConfirmDelete}
             onClose={()=>setCategoryToDelete(null)} 
+        />
+
+        <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        isLoading={isFetching}
+        
         />
     </div>
   )
