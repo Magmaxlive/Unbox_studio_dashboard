@@ -122,7 +122,7 @@ const CategoryPage = () => {
     }
   return (
     <div className='flex flex-col gap-8'>
-        <div className="flex justify-between gap-4">
+        <div className="flex justify-between items-center gap-4">
             <h1 className="font-bold text-2xl sm:text-3xl capitalize">categories</h1>
             {isAdmin && 
                 <CreateButton handleCreate={handleCreate} title='create category' />
