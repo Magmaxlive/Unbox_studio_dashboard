@@ -1,4 +1,4 @@
-import { unknown, type ZodType } from "zod";
+import { type ZodType } from "zod";
 
 export function zodValidator<T>(schema : ZodType<T>){
     return ({value}: {value: unknown}) => {

@@ -1,4 +1,3 @@
-import React from 'react'
 import type { Category } from '../../types/Category'
 import { useAuth } from '../../contexts/AuthContext';
 

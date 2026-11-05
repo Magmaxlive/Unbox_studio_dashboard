@@ -3,14 +3,19 @@ import { getCategories,createCategory,retrieveCategory,updateCategory,deleteCate
 import type { CategoryPayload } from '../../types/Category'
 
 export const categoryKeys = {
-    all : ['categories'] as const,
-    detail : (id:string) => ['categories',id] as const,
+    all: ["categories"] as const,
+
+  lists: () => [...categoryKeys.all, "list"] as const,
+  list: (page: number) => [...categoryKeys.lists(), page] as const,
+
+  details: () => [...categoryKeys.all, "detail"] as const,
+  detail: (id: string) => [...categoryKeys.details(), id] as const,
 }
 
 // fetch all categories
 export function useCategories(page = 1){
     return useQuery({
-        queryKey : [...categoryKeys.all,page],
+        queryKey : categoryKeys.list(page),
         queryFn : ()=> getCategories(page),
     });
 }
@@ -32,7 +37,7 @@ export function useCreateCategory(){
         mutationFn : (data:CategoryPayload) => createCategory(data),
         onSuccess : ()=>{
             queryClient.invalidateQueries({
-                queryKey : categoryKeys.all,
+                queryKey : categoryKeys.lists(),
             });
         }
     })
@@ -46,7 +51,7 @@ export function useUpdateCategory(){
         mutationFn : ({id,data}:{id:string,data:Partial<CategoryPayload>}) => updateCategory(id,data),
         onSuccess : (_,variables) => {
             queryClient.invalidateQueries({
-                queryKey : categoryKeys.all
+                queryKey : categoryKeys.lists()
             });
 
             queryClient.invalidateQueries({
@@ -62,10 +67,14 @@ export function useDeleteCategory(){
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn : (id:string) => deleteCategory(id),
-        onSuccess : ()=>{
+        onSuccess : (_,id)=>{
             queryClient.invalidateQueries({
-                queryKey : categoryKeys.all,
-            })
+                queryKey : categoryKeys.lists(),
+            });
+
+            queryClient.removeQueries({
+                queryKey: categoryKeys.detail(id),
+            });
         }
     })
 }

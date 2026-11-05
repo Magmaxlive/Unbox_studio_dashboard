@@ -1,4 +1,3 @@
-import React from 'react'
 import { useState } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { loginSchema } from '../../../schemas/auth/loginSchema'

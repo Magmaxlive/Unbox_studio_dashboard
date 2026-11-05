@@ -1,19 +1,23 @@
 import { useMutation,useQueryClient,useQuery } from "@tanstack/react-query";
 import { getBlogs,createBlogs,retrieveBlog,updateBlog,deleteBlog } from "../../api/blogs";
-import type { BlogPayload } from "../../types/Blogs";
-import { string } from "zod";
+import type { BlogPayload,BlogFilter } from "../../types/Blogs";
 
 
 export const blogKeys = {
-    all : ['blogs'] as const,
-    detail : (id:string) => ['blogs',id] as const,
+    all: ["blogs"] as const,
+
+    lists: () => [...blogKeys.all, "list"] as const,
+    list: (filters: BlogFilter) => [...blogKeys.lists(), filters] as const,
+
+    details: () => [...blogKeys.all, "detail"] as const,
+    detail: (id: string) => [...blogKeys.details(), id] as const,
 }
 
 // fetch all blogs
-export function useBlogs(page = 1) {
+export function useBlogs(filters:BlogFilter = {}) {
     return useQuery({
-        queryKey : [...blogKeys.all,page],
-        queryFn : () => getBlogs(page)
+        queryKey : blogKeys.list(filters),
+        queryFn : () => getBlogs(filters)
     })
 }
 
@@ -34,7 +38,7 @@ export function useCreateBlog(){
         mutationFn : (data:BlogPayload) => createBlogs(data),
         onSuccess : () => {
             queryClient.invalidateQueries({
-                queryKey : blogKeys.all,
+                queryKey : blogKeys.lists(),
             })
         }
     })
@@ -49,7 +53,7 @@ export function useUpdateBlog(){
         mutationFn : ({id,data}:{id:string,data:Partial<BlogPayload>}) => updateBlog(id,data),
         onSuccess : (_,variables) => {
             queryClient.invalidateQueries({
-                queryKey : blogKeys.all,
+                queryKey : blogKeys.lists(),
             });
 
             queryClient.invalidateQueries({
@@ -67,10 +71,14 @@ export function useDeleteBlog(){
 
     return useMutation({
         mutationFn : (id:string) => deleteBlog(id),
-        onSuccess : () => {
+        onSuccess : (_,id) => {
             queryClient.invalidateQueries({
-                queryKey : blogKeys.all
-            })
+                queryKey : blogKeys.lists()
+            });
+
+             queryClient.removeQueries({
+                queryKey: blogKeys.detail(id),
+            });
         }
     })
 }
