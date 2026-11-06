@@ -1,7 +1,6 @@
 import {useMutation,useQuery,useQueryClient} from '@tanstack/react-query'
 import { getCategories,getCategoryOption,createCategory,retrieveCategory,updateCategory,deleteCategory } from '../../api/categories'
 import type { CategoryPayload } from '../../types/Category'
-import { data } from 'react-router-dom';
 
 export const categoryKeys = {
     all: ["categories"] as const,

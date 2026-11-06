@@ -1,6 +1,5 @@
 import { Search,X } from "lucide-react"
 import type { BlogStatus } from "../../types/Blogs"
-import { getCategoryOption } from "../../api/categories"
 import { BLOG_STATUS_OPTIONS } from "./blogStatus"
 import { useCategoryOptions } from "../../hooks/queries/categories";
 
