@@ -1,4 +1,4 @@
-import { useMutation,useQueryClient,useQuery } from "@tanstack/react-query";
+import { useMutation,useQueryClient,useQuery,keepPreviousData } from "@tanstack/react-query";
 import { getBlogs,createBlogs,retrieveBlog,updateBlog,deleteBlog } from "../../api/blogs";
 import type { BlogPayload,BlogFilter } from "../../types/Blogs";
 
@@ -17,7 +17,8 @@ export const blogKeys = {
 export function useBlogs(filters:BlogFilter = {}) {
     return useQuery({
         queryKey : blogKeys.list(filters),
-        queryFn : () => getBlogs(filters)
+        queryFn : () => getBlogs(filters),
+        placeholderData : keepPreviousData
     })
 }
 
