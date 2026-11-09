@@ -1,11 +1,11 @@
-import type { Category,CategoryPayload } from "../types/Category";
+import type { Category,CategoryPayload,CategoryFilter } from "../types/Category";
 import api from "./axios";
 import type { PaginatedResponse } from "../types/PaginatedResponse";
 
 // get category
-export async function getCategories(page = 1): Promise<PaginatedResponse<Category>> {
+export async function getCategories(filters:CategoryFilter={}): Promise<PaginatedResponse<Category>> {
     const response = await api.get<PaginatedResponse<Category>>('/category/',{
-        params : {page}
+        params : filters
     });
 
     return response.data;

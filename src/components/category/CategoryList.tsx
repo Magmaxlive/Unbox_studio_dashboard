@@ -5,17 +5,18 @@ interface CategoryListProps{
   categories : Category[];
   handleEdit : (category:Category) => void;
   onDelete : (id:string) => void;
+  isFiltered? : boolean;
 }
 
-const CategoryList = ({categories,handleEdit,onDelete}:CategoryListProps) => {
+const CategoryList = ({categories,handleEdit,onDelete,isFiltered=false}:CategoryListProps) => {
   const {user} = useAuth();
   const isAdmin = user?.role === 'admin';
 
   if (!categories.length) return (
     <div className="rounded-xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center">
-      <h3 className="font-semibold text-gray-900">No categories found</h3>
+      <h3 className="font-semibold text-gray-900">{isFiltered ? 'No categories match this filter':'No categories found'}</h3>
         <p className="mt-1 text-sm text-gray-500">
-        Create your first category to get started.
+        {isFiltered ? 'Try a diffrent status filter':'Create your first category to get started.'}
         </p>
     </div>
   )

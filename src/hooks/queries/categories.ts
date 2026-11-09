@@ -1,12 +1,12 @@
 import {useMutation,useQuery,useQueryClient} from '@tanstack/react-query'
 import { getCategories,getCategoryOption,createCategory,retrieveCategory,updateCategory,deleteCategory } from '../../api/categories'
-import type { CategoryPayload } from '../../types/Category'
+import type { CategoryPayload,CategoryFilter } from '../../types/Category'
 
 export const categoryKeys = {
     all: ["categories"] as const,
 
   lists: () => [...categoryKeys.all, "list"] as const,
-  list: (page: number) => [...categoryKeys.lists(), page] as const,
+  list: (filters: CategoryFilter) => [...categoryKeys.lists(), filters] as const,
 
   options:()=> [...categoryKeys.lists(),'options'] as const,
 
@@ -15,10 +15,10 @@ export const categoryKeys = {
 }
 
 // fetch all categories
-export function useCategories(page = 1){
+export function useCategories(filters:CategoryFilter){
     return useQuery({
-        queryKey : categoryKeys.list(page),
-        queryFn : ()=> getCategories(page),
+        queryKey : categoryKeys.list(filters),
+        queryFn : ()=> getCategories(filters),
     });
 }
 
