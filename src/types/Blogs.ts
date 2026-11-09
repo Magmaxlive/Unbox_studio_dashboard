@@ -5,7 +5,9 @@ export interface BlogFilter{
     status?:BlogStatus;
     category?:string;
     search?:string;
-    ordering?:string
+    ordering?:string;
+    created_after?:string;
+    created_before?:string;
 }
 
 export interface BlogCategorySummary{

@@ -9,6 +9,15 @@ import { toast } from 'sonner';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Pagination from '../../ui/Pagination';
 import CreateButton from '../../ui/CreateButton';
+import type { CategoryFilter } from '../../../types/Category';
+
+const STATUS_FILTERS  =[
+    {value : 'all',label:'All'},
+    {value : 'active',label:'Active'},
+    {value : 'inactive',label:'Inactive'},
+] as const;
+
+type StatusFilter = typeof STATUS_FILTERS[number]['value']
 
 
 const CategoryPage = () => {
@@ -17,9 +26,15 @@ const CategoryPage = () => {
 
     const [currentPage,setCurrentPage] = useState(1);
     const [isFormOpen,setIsFormOpen] = useState(false)
+    const [status,setStatus] = useState<StatusFilter>('all')
     const [categoryToDelete,setCategoryToDelete] = useState<string|null>(null)
     const [apiFieldErrors, setApiFieldErrors] = useState<Record<string, string>>({});
-    const [selectedCategory,setSelectedCategory] = useState<Category|null>(null)
+    const [selectedCategory,setSelectedCategory] = useState<Category|null>(null);
+
+    const filters : CategoryFilter = {page:currentPage}
+    if (isAdmin && status !== 'all'){
+        filters.is_active = status === 'active'
+    }
     const {
         data,
         isLoading,
@@ -27,7 +42,7 @@ const CategoryPage = () => {
         error,
         refetch,
         isFetching
-    } = useCategories(currentPage);
+    } = useCategories(filters);
 
 
     const categories = data?.results ?? []
@@ -40,6 +55,11 @@ const CategoryPage = () => {
     const deleteMutation = useDeleteCategory();
 
     const isSubmitting = createMutation.isPending || updateMutation.isPending
+
+    const handleStatusFilterChange = (value:StatusFilter)=>{
+        setStatus(value);
+        setCurrentPage(1);
+    }
 
     const handleCreate = ()=>{
         setSelectedCategory(null)
@@ -57,10 +77,14 @@ const CategoryPage = () => {
 
     const handleConfirmDelete =()=>{
         if (!categoryToDelete) return ;
+        const isLastitemOnPage = categories.length === 1 && currentPage > 1;
 
         deleteMutation.mutate(categoryToDelete,{
             onSuccess : ()=>{
                 toast.success('Categroy Deleted successfully');
+                if (isLastitemOnPage){
+                    setCurrentPage((page)=>page-1);
+                }
                 setCategoryToDelete(null)
             },
             onError : (error)=>{
@@ -128,7 +152,28 @@ const CategoryPage = () => {
                 <CreateButton handleCreate={handleCreate} title='create category' />
             }
         </div>
-        <CategoryList categories={categories} handleEdit={handleEdit} onDelete={handleDelete} />
+
+        {isAdmin && (
+            <div role='group' aria-label="Filter categories by status" className="inline-flex w-fit rounded-lg border border-gray-200 bg-white p-1">
+                {STATUS_FILTERS.map((option)=>{
+                    const isSelected = status === option.value;
+                    return(
+                        <button key={option.value}
+                        type='button'
+                        aria-pressed={isSelected}
+                        onClick={()=>handleStatusFilterChange(option.value)}
+                        className={`cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                                isSelected ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'
+                            }`}
+                        >
+                            {option.label}
+                        </button>
+                    )
+                })}
+
+            </div>
+        )}
+        <CategoryList categories={categories} handleEdit={handleEdit} onDelete={handleDelete} isFiltered={status !=='all'} />
 
         <CategoryForm 
             apiFieldErrors={apiFieldErrors} 

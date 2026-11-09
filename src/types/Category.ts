@@ -11,6 +11,9 @@ export interface Category{
     updated_at : string;
     description : string;
     is_active : boolean; 
+    blog_count : number;
+    video_count : number;
+    usage_count : number
 }
 
 export interface CategoryPayload{
@@ -21,4 +24,9 @@ export interface CategoryPayload{
     text_color_hex : string;
     is_active : boolean;
     slug? : string;
+}
+
+export interface CategoryFilter{
+    is_active? : boolean;
+    page? : number
 }
