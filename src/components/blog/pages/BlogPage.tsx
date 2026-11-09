@@ -13,6 +13,7 @@ import BlogTable from '../BlogTable'
 import ConfirmDialog from '../../ui/ConfirmDialog'
 import BlogViewModal from '../BlogViewModal'
 
+
 const PAGE_SIZE = 12
 
 const BlogPage = () => {

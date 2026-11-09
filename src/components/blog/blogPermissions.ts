@@ -14,7 +14,16 @@ export function canDeleteBlog(blog:Blog) : boolean{
     return isMutableStatus(blog);
 }
 
-export default function getBlockedActionNote(blog:Blog,isAdmin:boolean) : string | null {
+export function getEditBlockedReason(blog:Blog,isAdmin:boolean):string|null{
+    return canEditBlog(blog,isAdmin) ? null : 'Only draft or rejected blogs can be edited.'
+}
+
+export function getDeleteBlockedReason(blog:Blog):string|null{
+    return canDeleteBlog(blog) ? null : 'Only draft or rejected blogs can be deleted.'
+}
+
+// A short explanation for the View modal, or null when every action is allowed.
+export function getBlockedActionNote(blog:Blog,isAdmin:boolean) : string | null {
     const canEdit = canEditBlog(blog,isAdmin);
     const canDelete = canDeleteBlog(blog);
 

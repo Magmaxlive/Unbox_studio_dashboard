@@ -3,6 +3,9 @@ import type { Blog } from "../../types/Blogs"
 import BlogCategoryBadge from "./BlogCategoryBadge"
 import BlogStatusBadge from "./BlogStatusBadge"
 import formatDate from "../../utlis/formatDate"
+import { getBlockedActionNote,getEditBlockedReason } from "./blogPermissions"
+import ActionButton from "../ui/ActionButton"
+import { Info } from "lucide-react"
 
 interface BlogViewModalProps{
     blog : Blog;
@@ -28,6 +31,8 @@ const sectionTitleClass = 'mb-2 text-xs font-semibold uppercase tracking-wide te
 
 const BlogViewModal = ({blog,isAdmin,onClose,onEdit}:BlogViewModalProps) => {
     const showRejectionReason = blog.status === 'rejected' && Boolean(blog.rejection_reason)
+    const actionNote = getBlockedActionNote(blog,isAdmin)
+
   return (
     <Modal isOpen onClose={onClose} title={blog.title} maxWidth="max-w-3xl" >
         <div className="flex flex-col gap-6">
@@ -37,6 +42,13 @@ const BlogViewModal = ({blog,isAdmin,onClose,onEdit}:BlogViewModalProps) => {
                 <BlogCategoryBadge category={blog.category_detail} />
                 <BlogStatusBadge status={blog.status}  />
             </div>
+
+            {actionNote && (
+                <div className="flex items-start gap-2 rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-600">
+                    <Info size={16} className="mt-0.5 shrink-0 text-gray-400" />
+                    <p>{actionNote}</p>
+                </div>
+            )}
 
             {/* meta */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 rounded-xl bg-gray-50 p-4 text-sm">
@@ -86,13 +98,15 @@ const BlogViewModal = ({blog,isAdmin,onClose,onEdit}:BlogViewModalProps) => {
                 >
                     Close
                 </button>
-                <button
-                    type="button"
+                <ActionButton
                     onClick={()=>onEdit(blog)}
-                    className="cursor-pointer rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700"
+                    disabledReason={getEditBlockedReason(blog,isAdmin)}
+                    className="rounded-lg px-5 py-2.5 text-sm font-medium text-white transition"
+                    enabledClassName="bg-gray-900 hover:bg-gray-700"
+                    disabledClassName="cursor-not-allowed bg-gray-300"
                 >
                     Edit blog
-                </button>
+                </ActionButton>
             </div>
         </div>
     </Modal>

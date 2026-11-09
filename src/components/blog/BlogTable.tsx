@@ -3,6 +3,8 @@ import type { Blog } from "../../types/Blogs"
 import BlogStatusBadge from "./BlogStatusBadge"
 import formatDate from "../../utlis/formatDate"
 import BlogCategoryBadge from "./BlogCategoryBadge"
+import { getEditBlockedReason,getDeleteBlockedReason } from "./blogPermissions"
+import ActionButton from "../ui/ActionButton"
 
 interface BlogTableProps{
     blogs : Blog[];
@@ -15,6 +17,8 @@ interface BlogTableProps{
 
 const thClass = "px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500"
 const tdClass = "px-4 py-3 align-middle"
+const actionBaseClass = "rounded-lg border px-3 py-1.5 text-sm font-medium transition capitalize cursor-pointer"
+
 
 const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete}:BlogTableProps) => {
   return (
@@ -98,18 +102,23 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete}:BlogT
                                     view
                                 </button>
 
-                                <button type="button" onClick={()=>onEdit(blog)}
-                                className="cursor-pointer capitalize rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-blue-700 transition hover:bg-blue-700 hover:text-white">
+                                <ActionButton
+                                 onClick={()=>onEdit(blog)}
+                                 disabledReason={getEditBlockedReason(blog,isAdmin)}
+                                 className={actionBaseClass}
+                                 enabledClassName="border-gray-200 text-blue-700 hover:bg-blue-700 hover:text-white"
+                                 >
                                     edit
-                                </button>
+                                </ActionButton>
 
-                                 <button
-                                    type="button"
+                                 <ActionButton
                                     onClick={()=>onDelete(blog)}
-                                    className="cursor-pointer rounded-lg border border-red-100 px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-600 hover:text-white"
+                                    disabledReason={getDeleteBlockedReason(blog)}
+                                    className={actionBaseClass}
+                                    enabledClassName="border-red-100 text-red-600 hover:bg-red-600 hover:text-white"
                                 >
                                     Delete
-                                </button>
+                                </ActionButton>
                             </div>
                         </td>
                     </tr>
