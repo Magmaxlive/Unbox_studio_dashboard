@@ -2,7 +2,6 @@ import { FileText } from "lucide-react"
 import type { Blog } from "../../types/Blogs"
 import BlogStatusBadge from "./BlogStatusBadge"
 import formatDate from "../../utlis/formatDate"
-import { th } from "zod/v4/locales";
 
 interface BlogTableProps{
     blogs : Blog[];
@@ -23,6 +22,7 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete}:BlogT
             <thead className="border-b border-gray-200 bg-gray-50">
                 <tr>
                 <th scope="col" className={`${thClass} text-left capitalize`}>blog</th>
+                <th scope="col" className={`${thClass} text-left capitalize hidden lg:flex`}>excerpt</th>
                 <th scope="col" className={`${thClass} text-left capitalize`}>category</th>
                 {isAdmin && (
                     <th scope="col" className={`${thClass} text-left capitalize`}>contributor</th>
@@ -44,14 +44,19 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete}:BlogT
                                     <FileText size={20} />
                                 </div>
                                 <div className="min-w-0 max-w-xs">
-                                    <div className="truncate font-medium text-gray-900" title={blog.title}>
+                                    <div className="truncate capitalize font-medium text-gray-900" title={blog.title}>
                                         {blog.title}
                                     </div>
-                                    <p className="truncate text-xs text-gray-500">
-                                        {blog.excerpt || 'No excerpt'}
-                                    </p>
+                                   
                                 </div>
                             </div>
+                        </td>
+
+                        {/* excerpt */}
+                        <td className={`${tdClass} max-w-[250px] hidden lg:table-cell`}>
+                             <p className="truncate text-xs text-gray-500">
+                                {blog.excerpt || 'No excerpt'}
+                            </p>
                         </td>
 
                         {/* category */}
@@ -93,14 +98,14 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete}:BlogT
 
                         {/* actions */}
                         <td className={`${tdClass} text-right`}>
-                            <div className="flex items-center justify-end gap-2">
+                            <div className="flex items-center  gap-2">
                                 <button type="button" onClick={()=>onView(blog)}
                                  className="cursor-pointer rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 capitalize transition hover:bg-gray-900 hover:text-white">
                                     view
                                 </button>
 
                                 <button type="button" onClick={()=>onEdit(blog)}
-                                className="cursor-pointer rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-blue-700 transition hover:bg-blue-700 hover:text-white">
+                                className="cursor-pointer capitalize rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-blue-700 transition hover:bg-blue-700 hover:text-white">
                                     edit
                                 </button>
 

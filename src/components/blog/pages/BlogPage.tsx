@@ -1,24 +1,32 @@
 import { useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import CreateButton from '../../ui/CreateButton'
-import BlogStatusBadge from '../BlogStatusBadge'
 import UseDebounce from '../../../hooks/UseDebounce'
 import BlogFilters from '../BlogFilters'
 import Pagination from '../../ui/Pagination'
-import type { BlogFilter,BlogStatus } from '../../../types/Blogs'
-import { useBlogs } from '../../../hooks/queries/blogs'
+import type { Blog, BlogFilter,BlogStatus } from '../../../types/Blogs'
+import { useBlogs,useDeleteBlog } from '../../../hooks/queries/blogs'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
+import { handleMutationError } from '../../../utlis/handleMutationError'
+import BlogTable from '../BlogTable'
+import ConfirmDialog from '../../ui/ConfirmDialog'
 
 const PAGE_SIZE = 12
 
 const BlogPage = () => {
     const {user} = useAuth()
     const isAdmin = user?.role === 'admin';
+    const navigate = useNavigate();
 
     // filter + pagination states
     const [currentPage,setCurrentPage] = useState(1)
     const [searchInput,setSearchInput] = useState('')
     const [status,setStatus] = useState<BlogStatus | ''>('')
     const [category,setCategory] = useState('')
+
+    // delete state
+    const [blogToDelete,setBlogToDelete] = useState<Blog | null>(null);
 
     // debounced search value reached API
     const debouncedSearch = UseDebounce(searchInput.trim())
@@ -32,6 +40,8 @@ const BlogPage = () => {
     const {
         data,isLoading,refetch,isFetching,error,isError
     } = useBlogs(filters)
+
+    const deleteMutation = useDeleteBlog()
 
     const blogs = data?.results ?? []
     const totalCount = data?.count ?? 0;
@@ -53,6 +63,42 @@ const BlogPage = () => {
     const handleCategoryChange = (value:string) => {
         setCategory(value);
         setCurrentPage(1)
+    }
+
+    const handleView = (blog:Blog)=>{
+        navigate(`/blogs/${blog.id}`)
+    }
+
+    const handleEdit = (blog:Blog)=>{
+        navigate(`/blogs/${blog.id}/edit`)
+    }
+
+    const handleDelete = (blog:Blog) =>{
+        setBlogToDelete(blog)
+    }
+
+    const handleCloseDelete = ()=>{
+        if (deleteMutation.isPending) return;
+        setBlogToDelete(null)
+    }
+
+    const handleConfirmDelete = ()=>{
+        if (!blogToDelete) return;
+
+        const isLastitemOnPage = blogs.length === 1 && currentPage > 1;
+        deleteMutation.mutate(blogToDelete.id,{
+            onSuccess : () => {
+                toast.success('Blog deleted successfully');
+                if(isLastitemOnPage){
+                    setCurrentPage((page)=>page-1)
+                }
+                setBlogToDelete(null)
+            },
+            onError : (error)=>{
+                handleMutationError(error)
+                setBlogToDelete(null)
+            }
+        })
     }
 
     // clear filters
@@ -105,21 +151,14 @@ const BlogPage = () => {
 
         // table
         return(
-            <ul className={`divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white transition-opacity ${isFetching ? 'opacity-60' : ''}`}>
-                {blogs.map((blog)=>(
-                    <li key={blog.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-                        <div className="min-w-0">
-                            <p className="truncate font-medium text-gray-900 capitalize">{blog.title}</p>
-                            <p className="text-xs text-gray-500 capitalize">
-                                {blog.category_detail?.name ?? 'uncategorised'}
-                                {isAdmin && `- ${blog.contributor_name}` }
-                            </p>
-                        </div>
-                        <BlogStatusBadge status={blog.status} />
-                    </li>
-                ))}
-
-            </ul>
+           <BlogTable
+            onDelete={handleDelete}
+            onView={handleView}
+            onEdit={handleEdit}
+            blogs={blogs}
+            isAdmin={isAdmin}
+            isFetching={isFetching}
+           />
         )
     }
 
@@ -150,6 +189,16 @@ const BlogPage = () => {
                 isLoading={isFetching}
             />
         )}
+
+        <ConfirmDialog
+            description={`Are you sure you want to delete ${blogToDelete?.title?? ''} ? This action cannot be undone`}
+            title='Delete blog ?'
+            isOpen={!!blogToDelete}
+            confirmText='delete blog'
+            isLoading={deleteMutation.isPending}
+            onConfirm={handleConfirmDelete}
+            onClose={handleCloseDelete}
+        />
     </div>
   )
 }

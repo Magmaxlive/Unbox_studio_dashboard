@@ -32,7 +32,7 @@ const CategoryPage = () => {
 
     const categories = data?.results ?? []
     const totalCount = data?.count ?? 0
-    const PAGE_SIZE = 12;
+    const PAGE_SIZE = 5;
     const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
     const createMutation = useCreateCategory();
@@ -57,10 +57,14 @@ const CategoryPage = () => {
 
     const handleConfirmDelete =()=>{
         if (!categoryToDelete) return ;
+        const isLastitemOnPage = categories.length === 1 && currentPage > 1;
 
         deleteMutation.mutate(categoryToDelete,{
             onSuccess : ()=>{
                 toast.success('Categroy Deleted successfully');
+                if (isLastitemOnPage){
+                    setCurrentPage((page)=>page-1);
+                }
                 setCategoryToDelete(null)
             },
             onError : (error)=>{
