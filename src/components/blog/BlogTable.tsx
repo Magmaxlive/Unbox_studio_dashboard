@@ -2,6 +2,7 @@ import { FileText } from "lucide-react"
 import type { Blog } from "../../types/Blogs"
 import BlogStatusBadge from "./BlogStatusBadge"
 import formatDate from "../../utlis/formatDate"
+import BlogCategoryBadge from "./BlogCategoryBadge"
 
 interface BlogTableProps{
     blogs : Blog[];
@@ -62,14 +63,7 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete}:BlogT
                         {/* category */}
 
                         <td className={tdClass}>
-                        {blog.category_detail ? (
-                            <span className="inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium capitalize"
-                            style={{ backgroundColor : blog.category_detail.color_hex , color:blog.category_detail.text_color_hex }}>
-                                {blog.category_detail.name}
-                            </span>
-                        ) :  (
-                            <span className="text-xs text-gray-400 capitalize">uncategorised</span>
-                        )}
+                            <BlogCategoryBadge category={blog.category_detail} />
                         </td>
 
                         {/* contributor (admin only) */}
