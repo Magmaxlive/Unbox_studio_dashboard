@@ -1,5 +1,7 @@
 import type { Category } from '../../types/Category'
 import { useAuth } from '../../contexts/AuthContext';
+import ActionButton from '../ui/ActionButton';
+import { formatCategoryUsage,getCategoryDeleteBlockedReason } from './categoryUsage';
 
 interface CategoryListProps{
   categories : Category[];
@@ -22,7 +24,11 @@ const CategoryList = ({categories,handleEdit,onDelete,isFiltered=false}:Category
   )
   return (
     <div className='grid grid-cols-1 sm:grid-cols-2 tablet:grid-cols-3 lg:grid-cols-4 gap-4'>
-      {categories.map((category)=>(
+      {categories.map((category)=>{
+        const usage = formatCategoryUsage(category);
+        const disabledReason = getCategoryDeleteBlockedReason(category);
+        return(
+        
         <div key={category.id} className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md flex flex-col gap-2">
           {/* category header */}
           <div className="flex justify-between gap-3 items-start">
@@ -87,13 +93,14 @@ const CategoryList = ({categories,handleEdit,onDelete,isFiltered=false}:Category
                   <button type='button' onClick={()=> handleEdit(category)} className="rounded-lg border border-gray-200 cursor-pointer px-3 py-1.5 text-sm font-medium text-blue-700 transition hover:bg-blue-700 hover:text-white">
                     Edit
                   </button>
-                  <button
-                    type="button"
+                  <ActionButton
+                    disabledReason={disabledReason}
                     onClick={() => onDelete(category.id)}
-                    className="rounded-lg border cursor-pointer border-red-100 px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-600 hover:text-white"
+                    className="rounded-lg border px-3 py-1.5 text-sm font-medium transition"
+                    enabledClassName="border-red-100 text-red-600 hover:bg-red-600 hover:text-white"
                   >
                     Delete
-                  </button>
+                  </ActionButton>
                 </div>
                 )
               }
@@ -101,7 +108,8 @@ const CategoryList = ({categories,handleEdit,onDelete,isFiltered=false}:Category
               
             </div>
         </div>
-      ))}
+      )})}
+
     </div>
   )
 }
