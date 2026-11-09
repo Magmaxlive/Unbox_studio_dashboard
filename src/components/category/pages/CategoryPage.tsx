@@ -32,7 +32,7 @@ const CategoryPage = () => {
 
     const categories = data?.results ?? []
     const totalCount = data?.count ?? 0
-    const PAGE_SIZE = 5;
+    const PAGE_SIZE = 12;
     const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
     const createMutation = useCreateCategory();

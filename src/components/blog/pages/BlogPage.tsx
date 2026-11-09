@@ -12,6 +12,7 @@ import { handleMutationError } from '../../../utlis/handleMutationError'
 import BlogTable from '../BlogTable'
 import ConfirmDialog from '../../ui/ConfirmDialog'
 import BlogViewModal from '../BlogViewModal'
+import { startOfLocalDayISO,startOfNextLocalDayISO } from '../../../utlis/dateRange'
 
 
 const PAGE_SIZE = 12
@@ -26,6 +27,8 @@ const BlogPage = () => {
     const [searchInput,setSearchInput] = useState('')
     const [status,setStatus] = useState<BlogStatus | ''>('')
     const [category,setCategory] = useState('')
+    const [dateFrom,setDateFrom] = useState('')
+    const [dateTo,setDateTo] = useState('')
 
     // delete state
     const [blogToDelete,setBlogToDelete] = useState<Blog | null>(null);
@@ -39,6 +42,17 @@ const BlogPage = () => {
     if (debouncedSearch) filters.search = debouncedSearch;
     if (status) filters.status = status;
     if (category) filters.category = category;
+
+    // date range : converted to timestamp in viewers timezone
+    if (isAdmin && dateFrom){
+        const createdAfter = startOfLocalDayISO(dateFrom)
+        if (createdAfter) filters.created_after = createdAfter
+    }
+
+    if (isAdmin && dateTo){
+        const createdBefore = startOfNextLocalDayISO(dateTo)
+        if (createdBefore) filters.created_before = createdBefore
+    }
 
     const {
         data,isLoading,refetch,isFetching,error,isError
@@ -65,6 +79,16 @@ const BlogPage = () => {
 
     const handleCategoryChange = (value:string) => {
         setCategory(value);
+        setCurrentPage(1)
+    }
+
+    const handleDateFromChange = (value:string) =>{
+        setDateFrom(value);
+        setCurrentPage(1)
+    }
+
+    const handleDateToChange = (value:string) =>{
+        setDateTo(value);
         setCurrentPage(1)
     }
 
@@ -114,7 +138,9 @@ const BlogPage = () => {
         setSearchInput('');
         setStatus('');
         setCategory('');
-        setCurrentPage(1)
+        setDateFrom('');
+        setDateTo('');
+        setCurrentPage(1);
     }
 
 // result area
@@ -186,6 +212,10 @@ const BlogPage = () => {
             onStatusChange={handleStatusChange}
             onClear={handleClearFilters}
             isAdmin={isAdmin}
+            dateFrom={dateFrom}
+            onDateFromChange={handleDateFromChange}
+            dateTo={dateTo}
+            onDateToChange={handleDateToChange}
         />
       
         {renderContent()}

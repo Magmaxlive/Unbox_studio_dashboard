@@ -25,7 +25,7 @@ const dateInputClass = "w-full cursor-pointer rounded-lg border border-gray-200 
 const BlogFilters = ({isAdmin,search,status,category,dateFrom,dateTo,onSearchChange,onStatusChange,onCategoryChange,onDateToChange,onDateFromChange,onClear}:BlogFilterProps) => {
     const today = todayInputValue();
     const {data:categories=[],isLoading:categoriesLoading,isError:categoriesError} = useCategoryOptions();
-    const hasActiveFilters = Boolean(search || status || category) 
+    const hasActiveFilters = Boolean(search || status || category || dateFrom || dateTo) 
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 ">
         <div className="flex flex-col  gap-3 sm:flex-row sm:items-center">
