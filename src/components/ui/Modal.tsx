@@ -35,7 +35,7 @@ const Modal = ({isOpen,onClose,title,description,children,maxWidth= "max-w-lg"}:
             <div role='dialog' aria-modal='true' aria-labelledby='modal-title' className={`w-full ${maxWidth} flex flex-col animate-in fade-in zoom-in-95 rounded-2xl bg-white shadow-2xl max-h-[90vh] overflow-hidden`}>
                 <div className="flex items-start justify-between border-b border-gray-100 px-6 py-5">
                     <div>
-                        <h2 id='modal-title' className="text-lg font-semibold text-gray-900">
+                        <h2 id='modal-title' className="text-lg capitalize font-semibold text-gray-900">
                             {title}
                         </h2>
 

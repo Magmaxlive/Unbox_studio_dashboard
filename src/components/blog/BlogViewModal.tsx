@@ -43,9 +43,9 @@ const BlogViewModal = ({blog,isAdmin,onClose,onEdit}:BlogViewModalProps) => {
                 {isAdmin && (
                     <MetaItem label="contributor" value={blog.contributor_name} />
                 )}
-                <MetaItem label="created" value={blog.created_at} />
-                <MetaItem label="updated" value={blog.updated_at} />
-                <MetaItem label="published" value={blog.published_at} />
+                <MetaItem label="created" value={formatDate(blog.created_at)} />
+                <MetaItem label="updated" value={formatDate(blog.updated_at)} />
+                <MetaItem label="published" value={formatDate(blog.published_at)} />
             </div>
 
             {/* rejected reason */}

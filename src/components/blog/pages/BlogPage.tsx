@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { handleMutationError } from '../../../utlis/handleMutationError'
 import BlogTable from '../BlogTable'
 import ConfirmDialog from '../../ui/ConfirmDialog'
+import BlogViewModal from '../BlogViewModal'
 
 const PAGE_SIZE = 12
 
@@ -27,6 +28,7 @@ const BlogPage = () => {
 
     // delete state
     const [blogToDelete,setBlogToDelete] = useState<Blog | null>(null);
+    const [blogToView,setBlogToView] = useState<Blog | null>(null);
 
     // debounced search value reached API
     const debouncedSearch = UseDebounce(searchInput.trim())
@@ -66,11 +68,16 @@ const BlogPage = () => {
     }
 
     const handleView = (blog:Blog)=>{
-        navigate(`/blogs/${blog.id}`)
+        setBlogToView(blog)
     }
 
     const handleEdit = (blog:Blog)=>{
         navigate(`/blogs/${blog.id}/edit`)
+    }
+
+    const handleEditFromView = (blog:Blog)=>{
+        setBlogToView(null)
+        handleEdit(blog)
     }
 
     const handleDelete = (blog:Blog) =>{
@@ -187,6 +194,15 @@ const BlogPage = () => {
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
                 isLoading={isFetching}
+            />
+        )}
+
+        {blogToView && (
+            <BlogViewModal
+                blog={blogToView}
+                isAdmin={isAdmin}
+                onClose={()=>setBlogToView(null)}
+                onEdit={handleEditFromView}
             />
         )}
 
