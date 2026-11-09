@@ -185,6 +185,7 @@ const BlogPage = () => {
             onSearchChange={handleSearchChange}
             onStatusChange={handleStatusChange}
             onClear={handleClearFilters}
+            isAdmin={isAdmin}
         />
       
         {renderContent()}
