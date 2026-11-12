@@ -19,12 +19,14 @@ const Modal = ({isOpen,onClose,title,description,children,maxWidth= "max-w-lg"}:
             if (event.key == 'Escape') onClose();
         };
 
+        const previousOverflow = document.body.style.overflow;
+
         document.addEventListener('keydown',handleEscape)
         document.body.style.overflow = 'hidden'
 
         return ()=>{
             document.removeEventListener('keydown',handleEscape);
-            document.body.style.overflow = "";
+            document.body.style.overflow = previousOverflow;
         }
     },[isOpen,onClose])
 
