@@ -187,6 +187,7 @@ const BlogPage = () => {
         return(
            <BlogTable
             onDelete={handleDelete}
+            user = {user}
             onView={handleView}
             onEdit={handleEdit}
             blogs={blogs}
@@ -232,6 +233,7 @@ const BlogPage = () => {
         {blogToView && (
             <BlogViewModal
                 blog={blogToView}
+                user = {user}
                 isAdmin={isAdmin}
                 onClose={()=>setBlogToView(null)}
                 onEdit={handleEditFromView}

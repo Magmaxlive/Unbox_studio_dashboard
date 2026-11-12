@@ -3,12 +3,14 @@ import type { Blog } from "../../types/Blogs"
 import BlogCategoryBadge from "./BlogCategoryBadge"
 import BlogStatusBadge from "./BlogStatusBadge"
 import formatDate from "../../utlis/formatDate"
-import { getBlockedActionNote,getEditBlockedReason } from "./blogPermissions"
+import { getBlogActionNote,getEditBlockedReason } from "./blogPermissions"
 import ActionButton from "../ui/ActionButton"
 import { Info } from "lucide-react"
+import type { AuthUser } from "../../api/auth"
 
 interface BlogViewModalProps{
     blog : Blog;
+    user : AuthUser | null;
     isAdmin : boolean;
     onClose : ()=> void;
     onEdit : (blog:Blog) => void
@@ -29,9 +31,9 @@ const MetaItem = ({label,value}:MetaItemProps) => (
 const sectionTitleClass = 'mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500'
 
 
-const BlogViewModal = ({blog,isAdmin,onClose,onEdit}:BlogViewModalProps) => {
+const BlogViewModal = ({blog,isAdmin,onClose,onEdit,user}:BlogViewModalProps) => {
     const showRejectionReason = blog.status === 'rejected' && Boolean(blog.rejection_reason)
-    const actionNote = getBlockedActionNote(blog,isAdmin)
+    const actionNote = getBlogActionNote(blog,user)
 
   return (
     <Modal isOpen onClose={onClose} title={blog.title} maxWidth="max-w-3xl" >
@@ -100,7 +102,7 @@ const BlogViewModal = ({blog,isAdmin,onClose,onEdit}:BlogViewModalProps) => {
                 </button>
                 <ActionButton
                     onClick={()=>onEdit(blog)}
-                    disabledReason={getEditBlockedReason(blog,isAdmin)}
+                    disabledReason={getEditBlockedReason(blog,user)}
                     className="rounded-lg px-5 py-2.5 text-sm font-medium text-white transition"
                     enabledClassName="bg-gray-900 hover:bg-gray-700"
                     disabledClassName="cursor-not-allowed bg-gray-300"

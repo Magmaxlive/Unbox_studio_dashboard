@@ -5,9 +5,11 @@ import formatDate from "../../utlis/formatDate"
 import BlogCategoryBadge from "./BlogCategoryBadge"
 import { getEditBlockedReason,getDeleteBlockedReason } from "./blogPermissions"
 import ActionButton from "../ui/ActionButton"
+import type { AuthUser } from "../../api/auth"
 
 interface BlogTableProps{
     blogs : Blog[];
+    user: AuthUser | null;
     isAdmin : boolean;
     isFetching ? : boolean;
     onView : (blog:Blog) => void;
@@ -20,14 +22,14 @@ const tdClass = "px-4 py-3 align-middle"
 const actionBaseClass = "rounded-lg border px-3 py-1.5 text-sm font-medium transition capitalize cursor-pointer"
 
 
-const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete}:BlogTableProps) => {
+const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:BlogTableProps) => {
   return (
     <div className={`overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm transition-opacity ${isFetching ? 'opacity-60':''}`}>
         <table className="w-full min-w-[760px] text-sm">
             <thead className="border-b border-gray-200 bg-gray-50">
                 <tr>
                 <th scope="col" className={`${thClass} text-left capitalize`}>blog</th>
-                <th scope="col" className={`${thClass} text-left capitalize hidden lg:flex`}>excerpt</th>
+                <th scope="col" className={`${thClass} text-left capitalize hidden lg:table-cell`}>excerpt</th>
                 <th scope="col" className={`${thClass} text-left capitalize`}>category</th>
                 {isAdmin && (
                     <th scope="col" className={`${thClass} text-left capitalize`}>contributor</th>
@@ -58,8 +60,8 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete}:BlogT
                         </td>
 
                         {/* excerpt */}
-                        <td className={`${tdClass} max-w-[250px] hidden lg:table-cell`}>
-                             <p className="truncate text-xs text-gray-500">
+                        <td className={`${tdClass} hidden lg:table-cell`}>
+                             <p className="max-w-[250px] truncate text-xs text-gray-500">
                                 {blog.excerpt || 'No excerpt'}
                             </p>
                         </td>
@@ -96,15 +98,18 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete}:BlogT
 
                         {/* actions */}
                         <td className={`${tdClass} text-right`}>
-                            <div className="flex items-center  gap-2">
-                                <button type="button" onClick={()=>onView(blog)}
-                                 className="cursor-pointer rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 capitalize transition hover:bg-gray-900 hover:text-white">
-                                    view
-                                </button>
+                            <div className="flex items-center justify-end gap-2">
+                                <ActionButton
+                                    onClick={()=>onView(blog)}
+                                    className={`${actionBaseClass} border-gray-200`}
+                                    enabledClassName="text-gray-700 hover:bg-gray-900 hover:text-white"
+                                >
+                                    View
+                                </ActionButton>
 
                                 <ActionButton
                                  onClick={()=>onEdit(blog)}
-                                 disabledReason={getEditBlockedReason(blog,isAdmin)}
+                                 disabledReason={getEditBlockedReason(blog,user)}
                                  className={actionBaseClass}
                                  enabledClassName="border-gray-200 text-blue-700 hover:bg-blue-700 hover:text-white"
                                  >
@@ -113,7 +118,7 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete}:BlogT
 
                                  <ActionButton
                                     onClick={()=>onDelete(blog)}
-                                    disabledReason={getDeleteBlockedReason(blog)}
+                                    disabledReason={getDeleteBlockedReason(blog,user)}
                                     className={actionBaseClass}
                                     enabledClassName="border-red-100 text-red-600 hover:bg-red-600 hover:text-white"
                                 >

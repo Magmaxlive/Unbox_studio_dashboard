@@ -1,5 +1,7 @@
 export type BlogStatus = | "draft" | "pending" | "published" | "rejected" | "archived";
 
+export type BlogTransition = | 'submit' | 'withdraw' | 'publish' | 'reject' | 'archive' | 'restore';
+
 export interface BlogFilter{
     page?:number;
     status?:BlogStatus;
@@ -35,6 +37,7 @@ export interface Blog{
     published_at : string | null;
     created_at : string;
     updated_at : string;
+    submitted_at : string | null;
 }
 
 export interface BlogPayload{
