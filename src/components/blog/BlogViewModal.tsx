@@ -8,6 +8,9 @@ import ActionButton from "../ui/ActionButton"
 import { Info } from "lucide-react"
 import type { AuthUser } from "../../api/auth"
 
+// temp
+import { useBlogActivity } from "../../hooks/queries/blogs"
+
 interface BlogViewModalProps{
     blog : Blog;
     user : AuthUser | null;
@@ -34,6 +37,8 @@ const sectionTitleClass = 'mb-2 text-xs font-semibold uppercase tracking-wide te
 const BlogViewModal = ({blog,isAdmin,onClose,onEdit,user}:BlogViewModalProps) => {
     const showRejectionReason = blog.status === 'rejected' && Boolean(blog.rejection_reason)
     const actionNote = getBlogActionNote(blog,user)
+    const {data:activity} = useBlogActivity(blog.id);
+    console.log(activity)
 
   return (
     <Modal isOpen onClose={onClose} title={blog.title} maxWidth="max-w-3xl" >
