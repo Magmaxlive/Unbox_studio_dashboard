@@ -63,6 +63,7 @@ function RejectDialog({isOpen,blogTitle,isSubmitting,apiFieldErrors,onConfirm,on
                     value={reason}
                     aria-invalid ={Boolean(errorMessage)}
                     onChange={(e)=>setReason(e.target.value)}
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none transition focus:border-gray-900"
                 />
 
                 {errorMessage && (
@@ -84,7 +85,7 @@ function RejectDialog({isOpen,blogTitle,isSubmitting,apiFieldErrors,onConfirm,on
                 <button 
                 type="submit"
                 disabled={isSubmitting}
-                className="cursor-pointer capitalizee rounded-lg bg-red-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="cursor-pointer capitalize rounded-lg bg-red-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     {isSubmitting ? 'rejecting' : 'reject blog'}
                 </button>

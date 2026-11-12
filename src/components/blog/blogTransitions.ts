@@ -48,9 +48,9 @@ export const BLOG_TRANSITION_CONFIG : Record<BlogTransition,TransitionConfig> = 
     archive : {
         label : 'Archive',
         successMessage : 'Blog archived',
-        className : 'border border-gray-200 text-gray-700 hover:bg-gray-100',
+        className : 'border border-gray-200 bg-gray-700 text-white hover:bg-black',
         confirm : {
-            title : 'archive blog?',
+            title : 'Archive blog?',
             description : 'It will be removed from the public website. You can restore it later.',
             confirmText : 'archive',
             variant : 'danger',
@@ -60,6 +60,6 @@ export const BLOG_TRANSITION_CONFIG : Record<BlogTransition,TransitionConfig> = 
     restore : {
         label : 'Restore',
         successMessage : 'Blog restored',
-        className : 'border border-gray-200 text-gray-700 hover:bg-gray-100',
+        className : 'border border-gray-200 text-white bg-cyan-600 hover:bg-cyan-800',
     },
 }
