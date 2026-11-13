@@ -10,6 +10,7 @@ import GuestRoute from './components/auth/GuestRoute'
 import DashboardLayout from './components/layout/DashboardLayout'
 import CategoryPage from './components/category/pages/CategoryPage'
 import BlogPage from './components/blog/pages/BlogPage'
+import BlogFormPage from './components/blog/pages/BlogFormPage'
 
 function App() {
   
@@ -32,6 +33,8 @@ function App() {
             <Route path='/dashboard'  element={<DashboardPage/>} />
             <Route path='/categories'  element={<CategoryPage/>} />
             <Route path='/blogs'  element={<BlogPage/>} />
+            <Route path='/blogs/new'  element={<BlogFormPage/>} />
+            <Route path='/blogs/:id/edit'  element={<BlogFormPage/>} />
         </Route>
       </Route>
 

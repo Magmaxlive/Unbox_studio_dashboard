@@ -72,6 +72,10 @@ const BlogPage = () => {
         setCurrentPage(1)
     }
 
+    const handleCreate = ()=>{
+        navigate('/blogs/new/')
+    }
+
     const handleStatusChange = (value:BlogStatus | '')=>{
         setStatus(value);
         setCurrentPage(1)
@@ -201,7 +205,7 @@ const BlogPage = () => {
     <div className='flex flex-col gap-4'>
         <div className="justify-between flex items-center">
             <h1 className="font-bold text-2xl sm:text-3xl capitalize">{isAdmin ? 'blogs' : 'my blogs'}</h1>
-            <CreateButton title='create blog'/>
+            <CreateButton title='create blog' handleCreate={handleCreate}/>
         </div>
 
         <BlogFilters

@@ -72,7 +72,7 @@ const Sidebar = ({isOpen,onClose}:SidebarProps) => {
             {menuItems.map((item)=>{
                 const Icon = item.icon;
                 return(
-                    <Link to={item.path} key={item.path} className={`flex tracking-wide items-center gap-4 text-soft rounded-md p-3 text font-medium transition hover:bg-violet hover:text-white ${location.pathname === item.path && 'bg-violet'}`}>
+                    <Link to={item.path} key={item.path} className={`flex tracking-wide items-center gap-4 text-soft rounded-md p-3 text font-medium transition hover:bg-violet hover:text-white ${location.pathname === item.path || location.pathname.startsWith(`${item.path}`) ? 'bg-violet' : ''}`}>
                         <Icon size={18}/>
                         {item.label}
                     </Link>
