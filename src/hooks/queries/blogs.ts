@@ -123,6 +123,16 @@ export function useBlogTransition(){
             queryClient.invalidateQueries({
                 queryKey : blogKeys.activity(updatedBlog.id)
             })
+        },
+
+        onError : (_error,variables) => {
+            queryClient.invalidateQueries({
+                queryKey : blogKeys.lists(),
+            });
+
+            queryClient.invalidateQueries({
+                queryKey : blogKeys.detail(variables.id)
+            })
         }
     })
 }

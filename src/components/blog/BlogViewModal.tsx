@@ -14,6 +14,7 @@ import { handleMutationError } from '../../utlis/handleMutationError'
 import { useBlog, useBlogTransition } from '../../hooks/queries/blogs'
 import { getAvailableTransitions, getBlogActionNote, getEditBlockedReason } from './blogPermissions'
 import { BLOG_TRANSITION_CONFIG } from './blogTransitions'
+import axios from 'axios'
 
 interface BlogViewModalProps {
     blog : Blog;
@@ -65,13 +66,16 @@ const BlogViewModal = ({blog,user,isAdmin,onClose,onEdit}:BlogViewModalProps) =>
                 setRejectErrors({});
             },
             onError : (error)=>{
-                if (transition === 'reject') {
+                const isFixable = axios.isAxiosError(error) && error.response?.status === 400;
+                if (transition === 'reject' && isFixable) {
                     // keep the dialog open; a {"reason": ...} error shows under the textarea
                     handleMutationError(error, { setFieldErrors : setRejectErrors });
                     return;
                 }
                 handleMutationError(error);
                 setPendingConfirm(null);
+                setIsRejectOpen(false);
+                setRejectErrors({});
             },
         });
     }
