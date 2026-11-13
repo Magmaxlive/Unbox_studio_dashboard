@@ -1,7 +1,7 @@
 import type { Category } from '../../types/Category'
 import { useAuth } from '../../contexts/AuthContext';
 import ActionButton from '../ui/ActionButton';
-import { formatCategoryUsage,getCategoryDeleteBlockedReason } from './categoryUsage';
+import { getCategoryDeleteBlockedReason } from './categoryUsage';
 
 interface CategoryListProps{
   categories : Category[];

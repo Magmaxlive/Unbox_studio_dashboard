@@ -1,17 +1,16 @@
-import { Link,useBlocker,useParams,useNavigate } from "react-router-dom"
+import { useBlocker,useParams,useNavigate } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
 import { useRef,useState } from "react";
 import { useForm,useSelector } from "@tanstack/react-form";
 import { toast } from "sonner";
 import { useAuth } from "../../../contexts/AuthContext";
-import { useCreateBlog,useBlogTransition, useUpdateBlog } from "../../../hooks/queries/blogs";
+import { useCreateBlog,useBlogTransition } from "../../../hooks/queries/blogs";
 import { useCategoryOptions } from "../../../hooks/queries/categories";
 import { blogSchema,type BlogFormValues } from "../../../schemas/blog/BlogSchema";
 import type { Blog,BlogPayload } from "../../../types/Blogs";
 import { handleMutationError } from "../../../utlis/handleMutationError";
 import { getErrorMessage } from "../../../utlis/getErrorMessage";
 import ConfirmDialog from "../../ui/ConfirmDialog";
-import unSavedChangesWarning from "../../../hooks/useUnSavedChangesWarning";
 import useUnSavedChangesWarning from "../../../hooks/useUnSavedChangesWarning";
 
 
@@ -221,7 +220,7 @@ const BlogFormPage = () => {
 
                          >
                             <option value="">{categoriesLoading ? 'Loading ...' : 'No category'}</option>
-                            {categoryOptions.map((cat)=>(
+                            {categories.map((cat)=>(
                                 <option key={cat.id} value={cat.id}>{cat.name}</option>
                             ))}
                          </select>
