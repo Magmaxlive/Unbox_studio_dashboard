@@ -1,7 +1,7 @@
-import { Link,useParams,useNavigate } from "react-router-dom"
+import { Link,useBlocker,useParams,useNavigate } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
 import { useRef,useState } from "react";
-import { useForm } from "@tanstack/react-form";
+import { useForm,useSelector } from "@tanstack/react-form";
 import { toast } from "sonner";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useCreateBlog,useBlogTransition, useUpdateBlog } from "../../../hooks/queries/blogs";
@@ -10,6 +10,10 @@ import { blogSchema,type BlogFormValues } from "../../../schemas/blog/BlogSchema
 import type { Blog,BlogPayload } from "../../../types/Blogs";
 import { handleMutationError } from "../../../utlis/handleMutationError";
 import { getErrorMessage } from "../../../utlis/getErrorMessage";
+import ConfirmDialog from "../../ui/ConfirmDialog";
+import unSavedChangesWarning from "../../../hooks/useUnSavedChangesWarning";
+import useUnSavedChangesWarning from "../../../hooks/useUnSavedChangesWarning";
+
 
 type SaveIntent = 'draft' | 'submit' | 'publish';
 
@@ -46,6 +50,12 @@ const BlogFormPage = () => {
 
      // which button was clicked; read inside onSubmit
     const intentRef = useRef<SaveIntent>('draft')
+    const allowLeaveRef = useRef(false)
+
+    const leaveAfterSave = ()=>{
+        allowLeaveRef.current = true;
+        navigate('/blogs')
+    }
 
     const form = useForm({
         defaultValues,
@@ -83,7 +93,7 @@ const BlogFormPage = () => {
 
             if (intent === 'draft'){
                 toast.success('Draft saved');
-                navigate('/blogs');
+                leaveAfterSave();
                 return;
             }
             
@@ -96,9 +106,24 @@ const BlogFormPage = () => {
                 toast.warning('Your blog was saved as a draft. You can submit it from the blog list')
             }
 
-            navigate('/blogs')
+            leaveAfterSave();
         }
     });
+
+    const currentValues = useSelector(form.store,(state)=>state.values);
+    const isSubmitting = useSelector(form.store,(state)=>state.isSubmitting)
+    const hasUnSavedChanges =  JSON.stringify(currentValues) != JSON.stringify(defaultValues)
+
+    useUnSavedChangesWarning(hasUnSavedChanges && !isSubmitting)
+
+    const blocker = useBlocker(({currentLocation,nextLocation})=>
+        hasUnSavedChanges && !allowLeaveRef.current && currentLocation.pathname!== nextLocation.pathname && nextLocation.pathname!== '/login'
+    )
+
+    const handleLeave = ()=>{
+        navigate('/blogs')
+    }
+
 
     const handleSave = (intent:SaveIntent) => {
         intentRef.current = intent;
@@ -108,9 +133,9 @@ const BlogFormPage = () => {
    if (isEditing) {
         return (
             <div className="flex flex-col gap-6">
-                <Link to="/blogs" className="flex w-fit items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900">
+                <button type="button" onClick={handleLeave} className="flex cursor-pointer w-fit items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900">
                     <ArrowLeft size={16} /> Back to blogs
-                </Link>
+                </button>
                 <p className="text-sm text-gray-500">Editing blog {id} (edit mode coming in the next step).</p>
             </div>
         )
@@ -118,9 +143,9 @@ const BlogFormPage = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <Link to='/blogs' className="flex w-fit items-center gap-1.5 text-sm font-medium text-gray-500 transition hover:text-gray-900">
+      <button type="button" onClick={handleLeave} className="flex w-fit cursor-pointer items-center gap-1.5 text-sm font-medium text-gray-500 transition hover:text-gray-900">
         <ArrowLeft size={16}/> Back to blogs
-      </Link>
+      </button>
 
       
         <h1 className="font-bold text-2xl sm:text-3xl capitalize">create blog</h1>
@@ -260,18 +285,28 @@ const BlogFormPage = () => {
                         >
                             Save draft
                         </button>
-                        <Link
-                                to="/blogs"
-                                className="px-4 py-2.5 rounded-lg text-center text-sm font-medium text-white bg-red-500 hover:bg-red-800"
+                        <button type="button"
+                                onClick={handleLeave}
+                                className="px-4 py-2.5 cursor-pointer rounded-lg text-center text-sm font-medium text-white bg-red-500 hover:bg-red-800"
                             >
                                 Cancel
-                            </Link>
+                            </button>
                     </div>
                 )}
             </form.Subscribe>
         </div>
 
         </form>
+
+        <ConfirmDialog
+        isOpen={blocker.state === 'blocked'}
+        title="Discard changes ?"
+        onClose={()=>blocker.reset?.()}
+        variant="danger"
+        confirmText="Discard"
+        description="You have unsaved changes. If you leave now, they will be lost."
+        onConfirm={()=>blocker.proceed?.()}
+        />
       
     </div>
   )

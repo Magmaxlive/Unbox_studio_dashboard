@@ -1,7 +1,7 @@
 
 import './App.css'
 import LoginPage from './components/auth/pages/LoginPage'
-import { Route,Routes } from 'react-router-dom'
+import { Route,Routes,RouterProvider,createBrowserRouter,createRoutesFromElements } from 'react-router-dom'
 import ProtectedRoutes from './components/auth/ProtectedRoutes'
 import DashboardPage from './components/pages/DashboardPage'
 import Unauthorized from './components/pages/Unauthorized'
@@ -12,12 +12,9 @@ import CategoryPage from './components/category/pages/CategoryPage'
 import BlogPage from './components/blog/pages/BlogPage'
 import BlogFormPage from './components/blog/pages/BlogFormPage'
 
-function App() {
-  
-
-  return (
-    <Routes>
-
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <>
       <Route path='/unauthorized' element={<Unauthorized/>}  />
 
       {/*guest route  */}
@@ -45,8 +42,15 @@ function App() {
 
       {/* unknown routes */}
       <Route path='*' element={<NotFound/>} />
+    </>
+  )
+)
 
-    </Routes>
+function App() {
+  
+
+  return (
+    <RouterProvider router={router} />
   )
 }
 
