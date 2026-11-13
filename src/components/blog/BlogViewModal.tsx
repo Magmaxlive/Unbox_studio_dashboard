@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Info } from 'lucide-react'
+import { Info,ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
 import Modal from '../ui/Modal'
 import ActionButton from '../ui/ActionButton'
@@ -15,6 +15,7 @@ import { useBlog, useBlogTransition } from '../../hooks/queries/blogs'
 import { getAvailableTransitions, getBlogActionNote, getEditBlockedReason } from './blogPermissions'
 import { BLOG_TRANSITION_CONFIG } from './blogTransitions'
 import axios from 'axios'
+import BlogActivityTimeline from './BlogActivityTimeline'
 
 interface BlogViewModalProps {
     blog : Blog;
@@ -51,6 +52,7 @@ const BlogViewModal = ({blog,user,isAdmin,onClose,onEdit}:BlogViewModalProps) =>
     const [pendingConfirm,setPendingConfirm] = useState<BlogTransition | null>(null);
     const [isRejectOpen,setIsRejectOpen] = useState(false);
     const [rejectErrors,setRejectErrors] = useState<Record<string, string>>({});
+    const [isActivityOpen,setIsActivityOpen] = useState(false)
 
     const showRejectionReason = current.status === 'rejected' && Boolean(current.rejection_reason);
     const actionNote = getBlogActionNote(current, user);
@@ -155,6 +157,28 @@ const BlogViewModal = ({blog,user,isAdmin,onClose,onEdit}:BlogViewModalProps) =>
                         {current.content || 'No content.'}
                     </div>
                 </section>
+
+                {/* activity section */}
+                <section>
+                    <button type="button" 
+                    onClick={()=>setIsActivityOpen((open)=>!open)}
+                    aria-expanded={isActivityOpen}
+                    className="flex w-full cursor-pointer items-center justify-between rounded-lg py-1 text-left"
+                    >
+                        <span className={sectionTitleClass.replace('mb-2 ', '')}>Activity</span>
+                        <ChevronDown
+                            size={16}
+                            className={`text-gray-400 transition ${isActivityOpen ? 'rotate-180' : ''}`}
+                        />
+                    </button>
+                    {isActivityOpen && (
+                        <div className="mb-3">
+                            <BlogActivityTimeline blogId={blog.id} currentUserId={user?.id} />
+                        </div>
+
+                    )}
+                </section>
+
 
                 {/* actions */}
                 <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-4">

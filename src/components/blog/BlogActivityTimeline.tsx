@@ -44,8 +44,8 @@ const ActivityEntry = ({entry,currentUserId}:{entry:ContentActivity;currentUserI
 
             <p className="text-sm text-gray-800">
                 <span className="font-medium">{entry.action_label}</span>
-                <span className="text-gray-500">by</span>
-                <span className="font-medium capitalize">{describeActor(entry,currentUserId)}</span>
+                <span className="text-gray-500"> by</span>
+                <span className="font-medium capitalize"> {describeActor(entry,currentUserId)}</span>
             </p>
 
             <time dateTime={entry.created_at} className="text-xs text-gray-500">
