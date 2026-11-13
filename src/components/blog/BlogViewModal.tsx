@@ -1,115 +1,251 @@
-import Modal from "../ui/Modal"
-import type { Blog } from "../../types/Blogs"
-import BlogCategoryBadge from "./BlogCategoryBadge"
-import BlogStatusBadge from "./BlogStatusBadge"
-import formatDate from "../../utlis/formatDate"
-import { getBlockedActionNote,getEditBlockedReason } from "./blogPermissions"
-import ActionButton from "../ui/ActionButton"
-import { Info } from "lucide-react"
+import { useState } from 'react'
+import { Info,ChevronDown } from 'lucide-react'
+import { toast } from 'sonner'
+import Modal from '../ui/Modal'
+import ActionButton from '../ui/ActionButton'
+import ConfirmDialog from '../ui/ConfirmDialog'
+import type { AuthUser } from '../../api/auth'
+import type { Blog, BlogTransition } from '../../types/Blogs'
+import BlogStatusBadge from './BlogStatusBadge'
+import BlogCategoryBadge from './BlogCategoryBadge'
+import RejectDialog from './RejectDialog'
+import formatDate from '../../utlis/formatDate'
+import { handleMutationError } from '../../utlis/handleMutationError'
+import { useBlog, useBlogTransition } from '../../hooks/queries/blogs'
+import { getAvailableTransitions, getBlogActionNote, getEditBlockedReason } from './blogPermissions'
+import { BLOG_TRANSITION_CONFIG } from './blogTransitions'
+import axios from 'axios'
+import BlogActivityTimeline from './BlogActivityTimeline'
 
-interface BlogViewModalProps{
+interface BlogViewModalProps {
     blog : Blog;
+    user : AuthUser | null;
     isAdmin : boolean;
-    onClose : ()=> void;
-    onEdit : (blog:Blog) => void
+    onClose : () => void;
+    onEdit : (blog:Blog) => void;
 }
 
-interface MetaItemProps{
+interface MetaItemProps {
     label : string;
-    value : string | null;
+    value : string;
 }
 
 const MetaItem = ({label,value}:MetaItemProps) => (
     <div className="min-w-0">
-        <dt className="text-xs text-gray-500 capitalize">{label}</dt>
+        <dt className="text-xs text-gray-500">{label}</dt>
         <dd className="mt-0.5 truncate font-medium text-gray-900">{value}</dd>
     </div>
 )
 
-const sectionTitleClass = 'mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500'
+const sectionTitleClass = "mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500"
+const footerButtonClass = "rounded-lg px-4 py-2.5 text-sm font-medium transition"
 
+const BlogViewModal = ({blog,user,isAdmin,onClose,onEdit}:BlogViewModalProps) => {
+    // Live data: refreshed on open, and updated instantly by transitions
+    // (useBlogTransition writes the new blog into this cache entry).
+    const {data:liveBlog} = useBlog(blog.id);
+    const current = liveBlog ?? blog;
 
-const BlogViewModal = ({blog,isAdmin,onClose,onEdit}:BlogViewModalProps) => {
-    const showRejectionReason = blog.status === 'rejected' && Boolean(blog.rejection_reason)
-    const actionNote = getBlockedActionNote(blog,isAdmin)
+    const transitionMutation = useBlogTransition();
+    const isBusy = transitionMutation.isPending;
+
+    const [pendingConfirm,setPendingConfirm] = useState<BlogTransition | null>(null);
+    const [isRejectOpen,setIsRejectOpen] = useState(false);
+    const [rejectErrors,setRejectErrors] = useState<Record<string, string>>({});
+    const [isActivityOpen,setIsActivityOpen] = useState(false)
+
+    const showRejectionReason = current.status === 'rejected' && Boolean(current.rejection_reason);
+    const actionNote = getBlogActionNote(current, user);
+    const availableTransitions = getAvailableTransitions(current, user);
+    const confirmConfig = pendingConfirm ? BLOG_TRANSITION_CONFIG[pendingConfirm].confirm : undefined;
+
+    const runTransition = (transition:BlogTransition, reason?:string) => {
+        transitionMutation.mutate({id:current.id, transition, reason},{
+            onSuccess : ()=>{
+                toast.success(BLOG_TRANSITION_CONFIG[transition].successMessage);
+                setPendingConfirm(null);
+                setIsRejectOpen(false);
+                setRejectErrors({});
+            },
+            onError : (error)=>{
+                const isFixable = axios.isAxiosError(error) && error.response?.status === 400;
+                if (transition === 'reject' && isFixable) {
+                    // keep the dialog open; a {"reason": ...} error shows under the textarea
+                    handleMutationError(error, { setFieldErrors : setRejectErrors });
+                    return;
+                }
+                handleMutationError(error);
+                setPendingConfirm(null);
+                setIsRejectOpen(false);
+                setRejectErrors({});
+            },
+        });
+    }
+
+    const handleTransitionClick = (transition:BlogTransition) => {
+        if (transition === 'reject') {
+            setRejectErrors({});
+            setIsRejectOpen(true);
+            return;
+        }
+
+        if (BLOG_TRANSITION_CONFIG[transition].confirm) {
+            setPendingConfirm(transition);
+            return;
+        }
+
+        runTransition(transition);
+    }
+
+    // Don't close the view while a dialog is on top or a request is running.
+    const handleClose = () => {
+        if (isBusy || pendingConfirm || isRejectOpen) return;
+        onClose();
+    }
 
   return (
-    <Modal isOpen onClose={onClose} title={blog.title} maxWidth="max-w-3xl" >
-        <div className="flex flex-col gap-6">
+    <>
+        <Modal isOpen onClose={handleClose} title={current.title} maxWidth="max-w-3xl">
+            <div className="flex flex-col gap-6">
 
-            {/* badges */}
-            <div className="flex flex-wrap items-center gap-2">
-                <BlogCategoryBadge category={blog.category_detail} />
-                <BlogStatusBadge status={blog.status}  />
-            </div>
-
-            {actionNote && (
-                <div className="flex items-start gap-2 rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-600">
-                    <Info size={16} className="mt-0.5 shrink-0 text-gray-400" />
-                    <p>{actionNote}</p>
+                {/* badges */}
+                <div className="flex flex-wrap items-center gap-2">
+                    <BlogStatusBadge status={current.status} />
+                    <BlogCategoryBadge category={current.category_detail} />
                 </div>
-            )}
 
-            {/* meta */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 rounded-xl bg-gray-50 p-4 text-sm">
-                {isAdmin && (
-                    <MetaItem label="contributor" value={blog.contributor_name} />
+                {/* why edit/delete are limited (works on touch devices, unlike tooltips) */}
+                {actionNote && (
+                    <div className="flex items-start gap-2 rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-600">
+                        <Info size={16} className="mt-0.5 shrink-0 text-gray-400" />
+                        <p>{actionNote}</p>
+                    </div>
                 )}
-                <MetaItem label="created" value={formatDate(blog.created_at)} />
-                <MetaItem label="updated" value={formatDate(blog.updated_at)} />
-                <MetaItem label="published" value={formatDate(blog.published_at)} />
-            </div>
 
-            {/* rejected reason */}
-            {showRejectionReason && (
-                <div className="rounded-xl border border-red-100 bg-red-50 p-4">
-                    <p className="text-xs font-semibold tracking-wide uppercase text-red-700">
-                        rejected reason
-                    </p>
-                    <div className="mt-1 text-red-700 text-sm whitespace-pre-wrap">
-                        {blog.rejection_reason}
+                {/* meta */}
+                <dl className="grid grid-cols-2 gap-4 rounded-xl bg-gray-50 p-4 text-sm sm:grid-cols-4">
+                    {isAdmin && <MetaItem label="Contributor" value={current.contributor_name} />}
+                    <MetaItem label="Created" value={formatDate(current.created_at)} />
+                    <MetaItem label="Submitted" value={formatDate(current.submitted_at)} />
+                    <MetaItem label="Published" value={formatDate(current.published_at)} />
+                </dl>
+
+                {/* rejection reason */}
+                {showRejectionReason && (
+                    <div className="rounded-xl border border-red-100 bg-red-50 p-4">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-red-700">
+                            Rejection reason
+                        </p>
+                        <p className="mt-1 whitespace-pre-wrap text-sm text-red-700">
+                            {current.rejection_reason}
+                        </p>
+                    </div>
+                )}
+
+                {/* excerpt */}
+                {current.excerpt && (
+                    <section>
+                        <h3 className={sectionTitleClass}>Excerpt</h3>
+                        <p className="text-sm italic leading-6 text-gray-600">{current.excerpt}</p>
+                    </section>
+                )}
+
+                {/* content: plain text until the editor step switches this to rendered HTML */}
+                <section>
+                    <h3 className={sectionTitleClass}>Content</h3>
+                    <div className="whitespace-pre-wrap break-words text-sm leading-7 text-gray-800">
+                        {current.content || 'No content.'}
+                    </div>
+                </section>
+
+                {/* activity section */}
+                <section>
+                    <button type="button" 
+                    onClick={()=>setIsActivityOpen((open)=>!open)}
+                    aria-expanded={isActivityOpen}
+                    className="flex w-full cursor-pointer items-center justify-between rounded-lg py-1 text-left"
+                    >
+                        <span className={sectionTitleClass.replace('mb-2 ', '')}>Activity</span>
+                        <ChevronDown
+                            size={16}
+                            className={`text-gray-400 transition ${isActivityOpen ? 'rotate-180' : ''}`}
+                        />
+                    </button>
+                    {isActivityOpen && (
+                        <div className="mb-3">
+                            <BlogActivityTimeline blogId={blog.id} currentUserId={user?.id} />
+                        </div>
+
+                    )}
+                </section>
+
+
+                {/* actions */}
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-4">
+                    <button
+                        type="button"
+                        onClick={handleClose}
+                        className={`cursor-pointer border border-gray-200 text-gray-600 hover:bg-gray-50 ${footerButtonClass}`}
+                    >
+                        Close
+                    </button>
+
+                    <div className="flex flex-wrap items-center justify-end gap-2">
+                        {availableTransitions.map(({transition, disabledReason})=>{
+                            const config = BLOG_TRANSITION_CONFIG[transition];
+                            return (
+                                <ActionButton
+                                    key={transition}
+                                    onClick={()=>handleTransitionClick(transition)}
+                                    disabledReason={isBusy ? 'Please wait...' : disabledReason}
+                                    className={footerButtonClass}
+                                    enabledClassName={config.className}
+                                    disabledClassName="cursor-not-allowed bg-gray-100 text-gray-400"
+                                >
+                                    {config.label}
+                                </ActionButton>
+                            )
+                        })}
+
+                        <ActionButton
+                            onClick={()=>onEdit(current)}
+                            disabledReason={getEditBlockedReason(current, user)}
+                            className={footerButtonClass}
+                            enabledClassName="border border-gray-200 text-blue-700 hover:bg-blue-700 hover:text-white"
+                            disabledClassName="cursor-not-allowed border border-gray-100 text-gray-300"
+                        >
+                            Edit
+                        </ActionButton>
                     </div>
                 </div>
-            )}
-
-            {/* excerpt */}
-            {blog.excerpt && (
-                <section>
-                    <h3 className={sectionTitleClass}>excerpt</h3>
-                    <p className="text-sm italic leading-6 text-gray-600">{blog.excerpt}</p>
-                </section>
-            )}
-
-            {/* content: plain text until the rich-text editor + sanitisation are decided */}
-            <section>
-                <h3 className={sectionTitleClass}>content</h3>
-                <div className="whitespace-pre-wrap break-words text-sm leading-7 text-gray-800">
-                    {blog.content || 'No content.'}
-                </div>
-
-            </section>
-
-            {/* actions */}
-            <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
-                <button
-                    type="button"
-                    onClick={onClose}
-                    className="cursor-pointer rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50"
-                >
-                    Close
-                </button>
-                <ActionButton
-                    onClick={()=>onEdit(blog)}
-                    disabledReason={getEditBlockedReason(blog,isAdmin)}
-                    className="rounded-lg px-5 py-2.5 text-sm font-medium text-white transition"
-                    enabledClassName="bg-gray-900 hover:bg-gray-700"
-                    disabledClassName="cursor-not-allowed bg-gray-300"
-                >
-                    Edit blog
-                </ActionButton>
             </div>
-        </div>
-    </Modal>
+        </Modal>
+
+        {/* dialogs are siblings of the Modal (its panel uses a transform,
+            which would trap position:fixed children inside it) */}
+        {confirmConfig && pendingConfirm && (
+            <ConfirmDialog
+                isOpen
+                title={confirmConfig.title}
+                description={`"${current.title}". ${confirmConfig.description}`}
+                confirmText={confirmConfig.confirmText}
+                variant={confirmConfig.variant}
+                loadingText="Working..."
+                isLoading={isBusy}
+                onConfirm={()=>runTransition(pendingConfirm)}
+                onClose={()=>{ if (!isBusy) setPendingConfirm(null); }}
+            />
+        )}
+
+        <RejectDialog
+            isOpen={isRejectOpen}
+            blogTitle={current.title}
+            isSubmitting={isBusy}
+            apiFieldErrors={rejectErrors}
+            onConfirm={(reason)=>runTransition('reject', reason)}
+            onClose={()=>setIsRejectOpen(false)}
+        />
+    </>
   )
 }
 

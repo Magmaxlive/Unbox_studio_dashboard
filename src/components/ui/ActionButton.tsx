@@ -24,7 +24,7 @@ const ActionButton = ({onClick,children,disabledReason = null,className = '',ena
     onClick={()=>{
         if (!isDisabled) onClick();
     }}
-    className={`${className} ${isDisabled ? disabledClassName : `${enabledClassName} cursor-pointer` }`}
+    className={`${className} relative ${isDisabled ? disabledClassName : `${enabledClassName} cursor-pointer` }`}
     >
       {children}
       {isDisabled && <span className="sr-only">({disabledReason})</span>}

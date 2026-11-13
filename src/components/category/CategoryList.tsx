@@ -1,7 +1,7 @@
 import type { Category } from '../../types/Category'
 import { useAuth } from '../../contexts/AuthContext';
 import ActionButton from '../ui/ActionButton';
-import { formatCategoryUsage,getCategoryDeleteBlockedReason } from './categoryUsage';
+import { getCategoryDeleteBlockedReason } from './categoryUsage';
 
 interface CategoryListProps{
   categories : Category[];
@@ -25,7 +25,7 @@ const CategoryList = ({categories,handleEdit,onDelete,isFiltered=false}:Category
   return (
     <div className='grid grid-cols-1 sm:grid-cols-2 tablet:grid-cols-3 lg:grid-cols-4 gap-4'>
       {categories.map((category)=>{
-        const usage = formatCategoryUsage(category);
+        // const usage = formatCategoryUsage(category);
         const disabledReason = getCategoryDeleteBlockedReason(category);
         return(
         
