@@ -29,7 +29,7 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:
             <thead className="border-b border-gray-200 bg-gray-50">
                 <tr>
                 <th scope="col" className={`${thClass} text-left capitalize`}>blog</th>
-                <th scope="col" className={`${thClass} text-left capitalize hidden lg:table-cell`}>excerpt</th>
+                
                 <th scope="col" className={`${thClass} text-left capitalize`}>category</th>
                 {isAdmin && (
                     <th scope="col" className={`${thClass} text-left capitalize`}>contributor</th>
@@ -59,12 +59,7 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:
                             </div>
                         </td>
 
-                        {/* excerpt */}
-                        <td className={`${tdClass} hidden lg:table-cell`}>
-                             <p className="max-w-[250px] truncate text-xs text-gray-500">
-                                {blog.excerpt || 'No excerpt'}
-                            </p>
-                        </td>
+                       
 
                         {/* category */}
 
@@ -98,7 +93,7 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:
 
                         {/* actions */}
                         <td className={`${tdClass} text-right`}>
-                            <div className="flex items-center justify-end gap-2">
+                            <div className="flex items-center justify-start gap-2">
                                 <ActionButton
                                     onClick={()=>onView(blog)}
                                     className={`${actionBaseClass} border-gray-200`}
