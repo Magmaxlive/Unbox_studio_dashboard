@@ -19,7 +19,8 @@ interface BlogTableProps{
 
 const thClass = "px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500"
 const tdClass = "px-4 py-3 align-middle"
-const actionBaseClass = "rounded-lg border px-3 py-1.5 text-sm font-medium transition capitalize cursor-pointer"
+const actionBaseClass = "rounded-lg px-3 py-1.5 text-sm font-medium transition capitalize"
+const actionDisabledClass = "cursor-not-allowed bg-gray-100 text-gray-400"
 
 
 const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:BlogTableProps) => {
@@ -96,8 +97,9 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:
                             <div className="flex items-center justify-start gap-2">
                                 <ActionButton
                                     onClick={()=>onView(blog)}
-                                    className={`${actionBaseClass} border-gray-200`}
-                                    enabledClassName="text-gray-700 hover:bg-gray-900 hover:text-white"
+                                    className={actionBaseClass}
+                                    enabledClassName="bg-gray-800 text-white hover:bg-gray-900"
+                                    disabledClassName={actionDisabledClass}
                                 >
                                     View
                                 </ActionButton>
@@ -105,8 +107,9 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:
                                 <ActionButton
                                  onClick={()=>onEdit(blog)}
                                  disabledReason={getEditBlockedReason(blog,user)}
-                                 className={actionBaseClass}
-                                 enabledClassName="border-gray-200 text-blue-700 hover:bg-blue-700 hover:text-white"
+                                  className={actionBaseClass}
+                                    enabledClassName="bg-blue-600 text-white hover:bg-blue-900"
+                                    disabledClassName={actionDisabledClass}
                                  >
                                     edit
                                 </ActionButton>
@@ -115,7 +118,8 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:
                                     onClick={()=>onDelete(blog)}
                                     disabledReason={getDeleteBlockedReason(blog,user)}
                                     className={actionBaseClass}
-                                    enabledClassName="border-red-100 text-red-600 hover:bg-red-600 hover:text-white"
+                                    enabledClassName="bg-red-600 text-white hover:bg-red-700"
+                                    disabledClassName={actionDisabledClass}
                                 >
                                     Delete
                                 </ActionButton>

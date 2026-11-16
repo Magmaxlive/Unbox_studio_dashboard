@@ -1,4 +1,4 @@
-import { useState,useEffect, useRef } from "react"
+import { useState, useRef } from "react"
 import { useBlocker,useNavigate, type NavigateOptions } from "react-router-dom"
 import { useForm,useSelector } from "@tanstack/react-form"
 import { ArrowLeft,Info } from "lucide-react"
@@ -14,7 +14,7 @@ import { getErrorMessage } from "../../utlis/getErrorMessage"
 import ConfirmDialog from "../ui/ConfirmDialog"
 import { getAvailableTransitions } from "./blogPermissions"
 import BlogStatusBadge from "./BlogStatusBadge"
-
+import RichTextEditor from "../ui/RichTextEditor"
 
 type SaveIntent = 'save' | 'submit' | 'publish'
 
@@ -272,14 +272,12 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
                     {(field)=>(
                         <div>
                             <label htmlFor="content" className={labelClass}>Content</label>
-                            <textarea
-                                id="content"
-                                rows={16}
+                            <RichTextEditor
+                                labelledBy="content-label"
                                 value={field.state.value}
-                                onChange={(e)=>field.handleChange(e.target.value)}
+                                onChange={field.handleChange}
                                 onBlur={field.handleBlur}
-                                placeholder="Write your blog..."
-                                className={`${inputClass} leading-7`}
+                                invalid={field.state.meta.errors.length > 0 || Boolean(apiFieldErrors.content)}
                             />
                             {field.state.meta.errors.map((error, index)=>(
                                 <p key={index} className={errorClass}>{getErrorMessage(error)}</p>
@@ -352,7 +350,7 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
                     )}
                 </form.Field>
 
-                {/* actions */}
+                                {/* actions */}
                 <div className="flex flex-col gap-2 border-t border-gray-100 pt-4">
                     {nextTransition && (
                         <button
@@ -371,11 +369,7 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
                         type="button"
                         onClick={()=>handleSave('save')}
                         disabled={isSubmitting}
-                        className={`cursor-pointer rounded-lg px-4 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
-                            nextTransition
-                                ? 'border border-gray-200 text-gray-700 hover:bg-gray-50'
-                                : 'bg-gray-900 text-white hover:bg-gray-700'
-                        }`}
+                        className="cursor-pointer rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {isSubmitting && !nextTransition ? 'Saving...' : saveLabel}
                     </button>
@@ -384,7 +378,7 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
                         type="button"
                         onClick={handleLeave}
                         disabled={isSubmitting}
-                        className="cursor-pointer py-1 text-center text-sm font-medium text-gray-500 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="cursor-pointer rounded-lg bg-gray-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         Cancel
                     </button>
