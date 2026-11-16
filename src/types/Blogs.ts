@@ -6,6 +6,7 @@ export interface BlogFilter{
     page?:number;
     status?:BlogStatus;
     category?:string;
+    category_slug?:string;
     search?:string;
     ordering?:string;
     created_after?:string;

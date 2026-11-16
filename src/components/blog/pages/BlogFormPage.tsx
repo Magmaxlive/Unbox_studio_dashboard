@@ -1,5 +1,5 @@
 import { useRef, type ReactNode } from "react";
-import { Link,useParams } from "react-router-dom";
+import { Link,useParams,useLocation } from "react-router-dom";
 import { ArrowLeft,Info } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -9,10 +9,15 @@ import BlogForm from "../BlogForm";
 import { getEditBlockedReason } from "../blogPermissions";
 
 
-const PageMessage = ({title,children}:{title:string,children?:ReactNode}) => (
+const PageMessage = ({title,children}:{title:string,children?:ReactNode}) => {
+    const location = useLocation();
+    const stateReturnTo = (location.state as { returnTo? : string } | null)?.returnTo;
+    const returnTo = stateReturnTo?.startsWith('/blogs') ? stateReturnTo : '/blogs';
+
+    return(
     <div className="flex flex-col gap-6">
         <Link
-            to='/blogs'
+            to={returnTo}
             className="flex w-fit items-center gap-1.5 text-sm font-medium text-gray-500 transition hover:text-gray-900"
         > 
             <ArrowLeft size={16} />
@@ -24,7 +29,8 @@ const PageMessage = ({title,children}:{title:string,children?:ReactNode}) => (
             {children}
         </div>
     </div>
-)
+    )
+}
 
 const BlogEditLoader = ({id}:{id:string})=>{
     const {user} = useAuth();

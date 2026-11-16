@@ -1,11 +1,25 @@
 import axios from 'axios'
 import type { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { refreshSession } from "./refresh";
+import { getCsrfToken } from './csrf';
 
 const api = axios.create({
     baseURL : import.meta.env.VITE_API_BASE_URL,
     withCredentials: true,
 });
+
+const UNSAFE_METHODS = ['post','put','patch','delete'];
+
+api.interceptors.request.use(async (config) => {
+    const method = (config.method ?? 'get').toLowerCase();
+
+    if (UNSAFE_METHODS.includes(method)) {
+        const token = await getCsrfToken();
+        config.headers.set('X-CSRFToken',token);
+    }
+
+    return config;
+})
 
 let refreshPromise: Promise<void> | null = null;
 

@@ -1,5 +1,5 @@
 import { useState, useRef } from "react"
-import { useBlocker,useNavigate, type NavigateOptions } from "react-router-dom"
+import { useBlocker,useNavigate,useLocation, type NavigateOptions } from "react-router-dom"
 import { useForm,useSelector } from "@tanstack/react-form"
 import { ArrowLeft,Info } from "lucide-react"
 import { toast } from "sonner"
@@ -50,6 +50,10 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
     const currentBlog = liveBlog ?? initialBlog;
 
     const navigate = useNavigate();
+    const location = useLocation();
+    const stateReturnTo = (location.state as { returnTo? : string } | null)?.returnTo;
+    const returnTo = stateReturnTo?.startsWith('/blogs') ? stateReturnTo : '/blogs'; 
+
     const {user} = useAuth();
     const isAdmin = user?.role === 'admin';
     const isEditingOthersContent = Boolean(initialBlog) && initialBlog?.contributor != user?.id;
@@ -143,7 +147,7 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
             if (intent === 'save'){
                 if (!initialBlog){
                     toast.success('Draft Saved');
-                    leaveTo(`/blogs/${saved.id}/edit`,{replace : true});
+                    leaveTo(`/blogs/${saved.id}/edit`,{ replace : true, state : location.state });
                     return;
                 }
                 syncWithSaved();
@@ -156,12 +160,12 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
             try {
                 await transitionMutation.mutateAsync({id:saved.id, transition : intent});
                 toast.success(intent === 'publish' ? 'Blog published' : 'Blog submitted for review');
-                leaveTo('/blogs')
+                leaveTo(returnTo)
             } catch (error) {
                 handleMutationError(error);
                 if (!initialBlog){
                     toast.warning('Your blog was saved as draft . You can submit it from its edit page.')
-                    leaveTo(`/blogs/${saved.id}/edit`,{replace:true})
+                    leaveTo(`/blogs/${saved.id}/edit`,{ replace : true, state : location.state })
                 }else{
                     toast.warning('Your changes were saved, but the status was not changed.');
                     syncWithSaved();
@@ -194,7 +198,7 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
     // cancel / back just navigate;
 
     const handleLeave = () =>{
-        navigate('/blogs')
+        navigate(returnTo)
     }
 
     const showRejectionReason = currentBlog?.status === 'rejected' && Boolean(currentBlog?.rejection_reason);
