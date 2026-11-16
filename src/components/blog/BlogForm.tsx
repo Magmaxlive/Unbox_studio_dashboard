@@ -69,8 +69,9 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
 
     // starting values for form , and the 'saved' baseline for
     // unsaved-changes detection (updated after each save in editmode )
-    const [initialValues] = useState<BlogFormValues>(()=> initialBlog ? toFormValues(initialBlog) : EMPTY_VALUES);
-    const [baseline,setBaseline] = useState<BlogFormValues>(initialValues);
+     const [baseline,setBaseline] = useState<BlogFormValues>(()=>
+        initialBlog ? toFormValues(initialBlog) : EMPTY_VALUES
+    );
 
     const [apiFieldErrors,setApifieldErrors] = useState<Record<string,string>>({});
     const [categoryError,setCategoryError] = useState('');
@@ -98,7 +99,7 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
         : nextTransition === 'publish' ? 'Save and publish' : currentBlog?.status === 'rejected' ? 'Save and resubmit' : 'Save and submit for review';
 
     const form = useForm({
-        defaultValues : initialValues,
+        defaultValues : baseline,
         validators : {
             onSubmit : blogSchema,
         },
