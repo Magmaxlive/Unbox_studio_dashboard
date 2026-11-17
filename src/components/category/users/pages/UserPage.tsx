@@ -1,14 +1,16 @@
 import React from 'react'
 import CreateButton from '../../../ui/CreateButton'
 import UsersTable from '../UsersTable'
-import type { User,UserFilter } from '../../../../types/Users'
+import type { User,UserFilter, UserRole } from '../../../../types/Users'
 import Pagination from '../../../ui/Pagination'
 import { useEffect,useState } from 'react'
 import { useUsers } from '../../../../hooks/queries/users'
 import { replace, useLocation, useSearchParams } from 'react-router-dom'
 import UseDebounce from '../../../../hooks/UseDebounce'
+import UserFilters from '../UserFilters'
 
 const PAGE_SIZE = 12
+const USER_ROLES : UserRole[] = ['admin','contributor']
 
 interface UpdateParamsOptions {
     // any filter change returns to page 1
@@ -23,6 +25,12 @@ const UserPage = () => {
     const location = useLocation();
     const pageParam = Number(searchParms.get('page'))
     const currentPage = Number.isInteger(pageParam) && pageParam > 1 ? pageParam : 1;
+
+    const roleParam = searchParms.get('role') ?? '';
+    const role : UserRole | '' = USER_ROLES.includes(roleParam as UserRole)
+    ? roleParam as UserRole
+    : '';
+
     
     const urlsearch = (searchParms.get('search') ?? '').trim();
 
@@ -60,6 +68,8 @@ const UserPage = () => {
 
     const filters : UserFilter = {page:currentPage};
     if (debouncedSearch) filters.search = debouncedSearch;
+    if (role) filters.role = role;
+    
 
     const {data,isLoading,isFetching,error,isError,refetch} = useUsers(filters)
 
@@ -72,6 +82,10 @@ const UserPage = () => {
     const hasActiveFilters = Boolean(urlsearch)
     const handlePageChage = (page:number) =>{
         updateParams({page : page > 1 ? String(page) : null},{resetPage:false})
+    }
+
+    const handleRoleChange = (value:UserRole | '')=>{
+        updateParams({role:value || null});
     }
 
     // clear filters
@@ -131,6 +145,14 @@ const UserPage = () => {
             <h1 className="font-semibold text-2xl sm:text-3xl capitalize">users</h1>
             <CreateButton title='add users' />
         </div>
+
+        <UserFilters
+            search={searchInput}
+            role={role}
+            onRoleChange={handleRoleChange}
+            onSearchChange={setSearchInput}
+            onClear={handleClearFilters}
+        />
         
         {renderContent()}
 

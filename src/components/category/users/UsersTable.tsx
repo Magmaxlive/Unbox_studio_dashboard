@@ -1,5 +1,6 @@
 import type { User } from "../../../types/Users"
 import ActionButton from "../../ui/ActionButton"
+import UserRoleBadge from "./UserRoleBadge";
 
 interface UserTableProps {
     users : User[];
@@ -46,7 +47,7 @@ const UsersTable = ({users,isFetching,onView,onEdit,onDelete}:UserTableProps) =>
 
                         {/* role */}
                         <td className={`${tdClass} capitalize`}>
-                            {user.role}
+                            <UserRoleBadge role={user.role} />
                         </td>
 
                         

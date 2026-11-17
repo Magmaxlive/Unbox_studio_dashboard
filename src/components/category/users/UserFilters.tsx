@@ -6,14 +6,14 @@ interface UserFilterProps{
     search : string;
     role : UserRole | '';
     onSearchChange : (value:string)=>void;
-    onRoleChange : (value:string)=>void;
+    onRoleChange : (value:UserRole | '')=>void;
     onClear : ()=>void;
 }
 
 const selectClass = 'w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-700 outline-none transition focus:border-gray-900 disabled:cursor-not-allowed disabled:opacity-50 sm:w-48'
-const dateInputClass = "w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition focus:border-gray-900 sm:w-44"
+// const dateInputClass = "w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition focus:border-gray-900 sm:w-44"
 
-const UserFilter = ({search,role,onClear,onRoleChange,onSearchChange}:UserFilterProps) => {
+const UserFilters = ({search,role,onClear,onRoleChange,onSearchChange}:UserFilterProps) => {
     const hasActiveFilters = Boolean(search || role)
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4">
@@ -33,7 +33,7 @@ const UserFilter = ({search,role,onClear,onRoleChange,onSearchChange}:UserFilter
             {/* role */}
             <select
                 value={role}
-                onChange={(e)=>onRoleChange(e.target.value)}
+                onChange={(e)=>onRoleChange(e.target.value as UserRole)}
                 aria-label="Filter by status"
                 className={selectClass}
             >
@@ -61,4 +61,4 @@ const UserFilter = ({search,role,onClear,onRoleChange,onSearchChange}:UserFilter
   )
 }
 
-export default UserFilter
+export default UserFilters
