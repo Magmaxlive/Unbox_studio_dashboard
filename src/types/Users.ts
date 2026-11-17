@@ -1,6 +1,9 @@
+export type UserRole = 'admin' | 'contributor';
+
 export interface UserFilter {
     page ? : number;
     search ? : string;
+    role? : UserRole;
 }
 
 export interface User{
