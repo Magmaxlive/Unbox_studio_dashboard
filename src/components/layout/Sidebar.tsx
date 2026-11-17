@@ -21,7 +21,7 @@ const Sidebar = ({isOpen,onClose}:SidebarProps) => {
     { label: isAdmin ? "Videos" : "My videos", path: "/videos", icon: Video },
     { label: isAdmin ? "Blogs" : "My Blogs", path: "/blogs", icon: FileText },
     { label: "Categories", path: "/categories", icon: Tags },
-    ...(isAdmin ?[{ label: "Users", path: "/users", icon: Users },] : []),
+    ...(isAdmin ?[{ label: "Users", path: "/admin/users", icon: Users },] : []),
     { label: "Settings", path: "/settings", icon: Settings },
   ];
   return (

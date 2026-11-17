@@ -12,6 +12,7 @@ import CategoryPage from './components/category/pages/CategoryPage'
 import BlogPage from './components/blog/pages/BlogPage'
 import BlogFormPage from './components/blog/pages/BlogFormPage'
 import RouteErrorPage from './components/pages/RouteErrorPage'
+import UserPage from './components/category/users/pages/UserPage'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -40,7 +41,11 @@ const router = createBrowserRouter(
 
       {/* Admin only */}
       <Route element={<ProtectedRoutes allowedRoles={['admin']}/>}>
-        <Route path='/admin/users'  element={<DashboardPage/>} />
+       <Route element={<DashboardLayout/>}>
+        <Route errorElement={<RouteErrorPage/>}>
+          <Route path='/admin/users'  element={<UserPage/>} />
+        </Route>
+        </Route>
       </Route>
 
       {/* unknown routes */}
