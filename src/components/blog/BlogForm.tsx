@@ -15,6 +15,7 @@ import ConfirmDialog from "../ui/ConfirmDialog"
 import { getAvailableTransitions } from "./blogPermissions"
 import BlogStatusBadge from "./BlogStatusBadge"
 import RichTextEditor from "../ui/RichTextEditor"
+import ImageUploader from "../ui/ImageUploader"
 
 type SaveIntent = 'save' | 'submit' | 'publish'
 
@@ -294,6 +295,7 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
 
             {/* ── side panel: settings + actions ── */}
             <div className="flex flex-col gap-5 rounded-xl border border-gray-200 bg-white p-5 lg:sticky lg:top-6 lg:self-start">
+                <ImageUploader onUploaded={(asset)=>console.log('uploaded',asset)} />
 
                 {/* category */}
                 <form.Field name="category">
