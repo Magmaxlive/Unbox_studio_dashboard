@@ -46,18 +46,18 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:
                     <tr key={blog.id} className="transition hover:bg-gray-50">
                         {/* blog : thumbnail + title + excerpt */}
                         <td className={tdClass}>
-                            <div className="flex items-center gap-3">
-                                {/* placeholder cover image */}
-                                <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-400">
-                                    <FileText size={20} />
-                                </div>
-                                <div className="min-w-0 max-w-xs">
-                                    <div className="truncate capitalize font-medium text-gray-900" title={blog.title}>
-                                        {blog.title}
+                                {blog.cover_image_detail?.thumbnail_url ? (
+                                    <img
+                                        src={blog.cover_image_detail.thumbnail_url}
+                                        alt=""
+                                        loading="lazy"
+                                        className="size-14 shrink-0 rounded-lg bg-gray-100 object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-400">
+                                        <FileText size={20} />
                                     </div>
-                                   
-                                </div>
-                            </div>
+                                )}
                         </td>
 
                        

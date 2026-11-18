@@ -16,6 +16,9 @@ import { getAvailableTransitions } from "./blogPermissions"
 import BlogStatusBadge from "./BlogStatusBadge"
 import RichTextEditor from "../ui/RichTextEditor"
 import ImageUploader from "../ui/ImageUploader"
+import CoverImageField from "./CoverImageField"
+import { useUpdateMediaAsset } from "../../hooks/queries/media"
+
 
 type SaveIntent = 'save' | 'submit' | 'publish'
 
@@ -30,7 +33,8 @@ const EMPTY_VALUES : BlogFormValues = {
     title : '',
     content : '',
     category : '',
-    excerpt : ''
+    excerpt : '',
+    cover_image : null,
 }
 
 const toFormValues = (blog:Blog) : BlogFormValues => ({
@@ -38,6 +42,14 @@ const toFormValues = (blog:Blog) : BlogFormValues => ({
     content : blog.content,
     excerpt : blog.excerpt,
     category : blog.category ?? '',
+    cover_image : blog.cover_image_detail 
+        ?{
+           id : blog.cover_image_detail.id,
+           url : blog.cover_image_detail.url,
+           thumbnail_url : blog.cover_image_detail.thumbnail_url,
+           alt_text : blog.cover_image_detail.alt_text 
+        }
+        : null
 })
 
 const EXCERPT_MAX = 300;
@@ -62,6 +74,7 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
     const createMutation = useCreateBlog();
     const updateMutation = useUpdateBlog();
     const transitionMutation = useBlogTransition();
+    const updateMediaMutation = useUpdateMediaAsset();
 
     // Categories : active ones , plus the blog's current one even if inactive
     // otherwise saving would silently remove it.
@@ -80,6 +93,13 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
 
     const [apiFieldErrors,setApifieldErrors] = useState<Record<string,string>>({});
     const [categoryError,setCategoryError] = useState('');
+    const [coverError,setCoverError] = useState('')
+
+    const storedAltRef = useRef<Record<string,string>>(
+        initialBlog?.cover_image_detail
+        ? {[initialBlog.cover_image_detail.id] : initialBlog.cover_image_detail.alt_text}
+        : {}
+    )
 
     // which button was clicked;
     const intentRef = useRef<SaveIntent>('save');
@@ -113,11 +133,38 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
 
             setApifieldErrors({});
             setCategoryError('');
+            setCoverError('');
 
             // submit/publish-only rule (mirrors Blog.get_submission_errors)
-            if (intent !== 'save' && !value.category){
-                setCategoryError('Choose a category before submitting.');
-                return;
+            if (intent !== 'save'){
+                let blocked = false;
+                if(!value.category){
+                    setCategoryError('Choose a category before submitting.');
+                    blocked = true;
+                }
+
+                if (!value.cover_image){
+                    setCoverError('Add a cover image before submitting.')
+                    blocked = true;
+                }
+
+                if (blocked) return;
+                
+            }
+
+            // 0. alt text lives on the image asset: save it first if it changed
+            const cover = value.cover_image;
+            if (cover) {
+                const altText = cover.alt_text.trim();
+                if (altText !== (storedAltRef.current[cover.id] ?? '')) {
+                    try {
+                        await updateMediaMutation.mutateAsync({ id : cover.id, alt_text : altText });
+                        storedAltRef.current[cover.id] = altText;
+                    } catch (error) {
+                        handleMutationError(error);
+                        return;
+                    }
+                }
             }
 
             const fields = {
@@ -125,6 +172,7 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
                 content : value.content,
                 category : value.category || null,
                 excerpt : value.excerpt.trim(),
+                cover_image : cover?.id ?? null,
             };
 
             // 1. save (create a draft or update the exisiting blog)
@@ -141,6 +189,9 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
             // Refresh the form with what the server stored 
             const syncWithSaved = () =>{
                 const savedValues = toFormValues(saved);
+                if (saved.cover_image_detail) {
+                    storedAltRef.current[saved.cover_image_detail.id] = saved.cover_image_detail.alt_text;
+                }
                 setBaseline(savedValues);
                 form.reset(savedValues);
             }
@@ -295,7 +346,29 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
 
             {/* ── side panel: settings + actions ── */}
             <div className="flex flex-col gap-5 rounded-xl border border-gray-200 bg-white p-5 lg:sticky lg:top-6 lg:self-start">
-                <ImageUploader onUploaded={(asset)=>console.log('uploaded',asset)} />
+                 {/* cover image */}
+                <form.Field name="cover_image">
+                    {(field)=>(
+                        <div>
+                            <CoverImageField
+                                value={field.state.value}
+                                onChange={(next)=>{
+                                    // remember the alt text the asset had when first chosen
+                                    if (next && !(next.id in storedAltRef.current)) {
+                                        storedAltRef.current[next.id] = next.alt_text;
+                                    }
+                                    field.handleChange(next);
+                                    setCoverError('');
+                                }}
+                                error={coverError || apiFieldErrors.cover_image}
+                                disabled={isSubmitting}
+                            />
+                            {field.state.meta.errors.map((error, index)=>(
+                                <p key={index} className={errorClass}>{getErrorMessage(error)}</p>
+                            ))}
+                        </div>
+                    )}
+                </form.Field>
 
                 {/* category */}
                 <form.Field name="category">
