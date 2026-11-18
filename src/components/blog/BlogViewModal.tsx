@@ -114,8 +114,7 @@ const BlogViewModal = ({blog,user,isAdmin,onClose,onEdit}:BlogViewModalProps) =>
                 {/* ── article: how readers will see it ── */}
                 <article className="min-w-0">
                     {/* cover image area (placeholder until media uploads, Phase 4) */}
-                    <div className="mb-6 flex aspect-[16/7] items-center justify-center rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 text-gray-400">
-                        {current.cover_image_detail?.url ? (
+                     {current.cover_image_detail?.url ? (
                         <img
                             src={current.cover_image_detail.url}
                             alt={current.cover_image_detail.alt_text}
@@ -131,7 +130,6 @@ const BlogViewModal = ({blog,user,isAdmin,onClose,onEdit}:BlogViewModalProps) =>
                             </div>
                         </div>
                     )}
-                    </div>
 
                     <div className="mx-auto max-w-[68ch]">
                         {current.category_detail && (
