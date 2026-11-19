@@ -18,6 +18,7 @@ import RichTextEditor from "../ui/RichTextEditor"
 import ImageUploader from "../ui/ImageUploader"
 import CoverImageField from "./CoverImageField"
 import { useUpdateMediaAsset } from "../../hooks/queries/media"
+import { BLOG_STATUS_CONFIG } from "./blogStatus"
 
 
 type SaveIntent = 'save' | 'submit' | 'publish'
@@ -150,6 +151,23 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
 
                 if (blocked) return;
                 
+            }
+
+            const status = currentBlog?.status;
+            if (status == 'pending' || status == 'published' || status == 'archived'){
+                const statusLabel = BLOG_STATUS_CONFIG[status].label.toLowerCase();
+                let blocked = false;
+
+                if (baseline.category && !value.category){
+                    setCategoryError(`A ${statusLabel} blog's category can be changed but not removed.`);
+                    blocked = true;
+                }
+
+                if (baseline.cover_image && !value.cover_image){
+                    setCoverError(`A ${statusLabel} blog's cover image can be replaced but not removed.`);
+                    blocked = true;
+                }
+                if (blocked) return;
             }
 
             // 0. alt text lives on the image asset: save it first if it changed
