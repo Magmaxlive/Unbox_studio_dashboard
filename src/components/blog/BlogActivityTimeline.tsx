@@ -121,7 +121,7 @@ const ActivityPage = ({blogId,page,currentUserId,isLastShown,onShowMore}:Activit
 function BlogActivityTimeline({blogId,currentUserId}:BlogActivityTimelineProps) {
     const [pagesShown,setPagesShown] = useState(1);
   return (
-    <ol className="ml-1.5 space-y-4 border-1 border-gray-200 py-1">
+    <ol className="ml-1.5 space-y-4 border-1 border-gray-200 py-2">
         {Array.from({length : pagesShown},(_,index)=>{
             const page = index + 1;
             return(

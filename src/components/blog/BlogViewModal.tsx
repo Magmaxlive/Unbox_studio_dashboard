@@ -1,21 +1,22 @@
 import { useState } from 'react'
-import { Info,ChevronDown } from 'lucide-react'
+import { ChevronDown, FileText, Info } from 'lucide-react'
 import { toast } from 'sonner'
+import axios from 'axios'
 import Modal from '../ui/Modal'
 import ActionButton from '../ui/ActionButton'
 import ConfirmDialog from '../ui/ConfirmDialog'
+import RichTextContent from '../ui/RichTextContent'
 import type { AuthUser } from '../../api/auth'
 import type { Blog, BlogTransition } from '../../types/Blogs'
 import BlogStatusBadge from './BlogStatusBadge'
 import BlogCategoryBadge from './BlogCategoryBadge'
+import BlogActivityTimeline from './BlogActivityTimeline'
 import RejectDialog from './RejectDialog'
 import formatDate from '../../utlis/formatDate'
 import { handleMutationError } from '../../utlis/handleMutationError'
 import { useBlog, useBlogTransition } from '../../hooks/queries/blogs'
 import { getAvailableTransitions, getBlogActionNote, getEditBlockedReason } from './blogPermissions'
 import { BLOG_TRANSITION_CONFIG } from './blogTransitions'
-import axios from 'axios'
-import BlogActivityTimeline from './BlogActivityTimeline'
 
 interface BlogViewModalProps {
     blog : Blog;
@@ -25,24 +26,19 @@ interface BlogViewModalProps {
     onEdit : (blog:Blog) => void;
 }
 
-interface MetaItemProps {
-    label : string;
-    value : string;
-}
+const panelClass = "rounded-xl border border-gray-200 bg-white p-4"
+const panelTitleClass = "text-xs font-semibold uppercase tracking-wide text-gray-500"
+const actionButtonClass = "w-full rounded-lg px-4 py-2.5 text-sm font-medium transition"
 
-const MetaItem = ({label,value}:MetaItemProps) => (
-    <div className="min-w-0">
-        <dt className="text-xs text-gray-500">{label}</dt>
-        <dd className="mt-0.5 truncate font-medium text-gray-900">{value}</dd>
+const DetailRow = ({ label, value }:{ label:string; value:React.ReactNode }) => (
+    <div className="flex items-start justify-between gap-3 py-1.5">
+        <dt className="shrink-0 text-xs text-gray-500">{label}</dt>
+        <dd className="min-w-0 text-right text-sm font-medium text-gray-800">{value}</dd>
     </div>
 )
 
-const sectionTitleClass = "mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500"
-const footerButtonClass = "rounded-lg px-4 py-2.5 text-sm font-medium transition"
-
 const BlogViewModal = ({blog,user,isAdmin,onClose,onEdit}:BlogViewModalProps) => {
     // Live data: refreshed on open, and updated instantly by transitions
-    // (useBlogTransition writes the new blog into this cache entry).
     const {data:liveBlog} = useBlog(blog.id);
     const current = liveBlog ?? blog;
 
@@ -52,8 +48,9 @@ const BlogViewModal = ({blog,user,isAdmin,onClose,onEdit}:BlogViewModalProps) =>
     const [pendingConfirm,setPendingConfirm] = useState<BlogTransition | null>(null);
     const [isRejectOpen,setIsRejectOpen] = useState(false);
     const [rejectErrors,setRejectErrors] = useState<Record<string, string>>({});
-    const [isActivityOpen,setIsActivityOpen] = useState(false)
+    const [isActivityOpen,setIsActivityOpen] = useState(false);
 
+    const isOwnBlog = current.contributor === user?.id;
     const showRejectionReason = current.status === 'rejected' && Boolean(current.rejection_reason);
     const actionNote = getBlogActionNote(current, user);
     const availableTransitions = getAvailableTransitions(current, user);
@@ -69,11 +66,14 @@ const BlogViewModal = ({blog,user,isAdmin,onClose,onEdit}:BlogViewModalProps) =>
             },
             onError : (error)=>{
                 const isFixable = axios.isAxiosError(error) && error.response?.status === 400;
+
                 if (transition === 'reject' && isFixable) {
-                    // keep the dialog open; a {"reason": ...} error shows under the textarea
+                    // e.g. {"reason": ...}: keep the dialog open so it can be corrected
                     handleMutationError(error, { setFieldErrors : setRejectErrors });
                     return;
                 }
+
+                // not fixable here (e.g. 403: status already changed elsewhere)
                 handleMutationError(error);
                 setPendingConfirm(null);
                 setIsRejectOpen(false);
@@ -103,121 +103,162 @@ const BlogViewModal = ({blog,user,isAdmin,onClose,onEdit}:BlogViewModalProps) =>
         onClose();
     }
 
+    const bylineName = isOwnBlog ? 'You' : current.contributor_name;
+    const bylineDate = formatDate(current.published_at ?? current.created_at);
+
   return (
     <>
-        <Modal isOpen onClose={handleClose} title={current.title} maxWidth="max-w-3xl">
-            <div className="flex flex-col gap-6">
+        <Modal isOpen onClose={handleClose} title="Blog preview" maxWidth="max-w-5xl">
+            <div className="grid grid-cols-1 gap-8 py-2 tablet:grid-cols-[minmax(0,1fr)_280px]">
 
-                {/* badges */}
-                <div className="flex flex-wrap items-center gap-2">
-                    <BlogStatusBadge status={current.status} />
-                    <BlogCategoryBadge category={current.category_detail} />
-                </div>
-
-                {/* why edit/delete are limited (works on touch devices, unlike tooltips) */}
-                {actionNote && (
-                    <div className="flex items-start gap-2 rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-600">
-                        <Info size={16} className="mt-0.5 shrink-0 text-gray-400" />
-                        <p>{actionNote}</p>
-                    </div>
-                )}
-
-                {/* meta */}
-                <dl className="grid grid-cols-2 gap-4 rounded-xl bg-gray-50 p-4 text-sm sm:grid-cols-4">
-                    {isAdmin && <MetaItem label="Contributor" value={current.contributor_name} />}
-                    <MetaItem label="Created" value={formatDate(current.created_at)} />
-                    <MetaItem label="Submitted" value={formatDate(current.submitted_at)} />
-                    <MetaItem label="Published" value={formatDate(current.published_at)} />
-                </dl>
-
-                {/* rejection reason */}
-                {showRejectionReason && (
-                    <div className="rounded-xl border border-red-100 bg-red-50 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-red-700">
-                            Rejection reason
-                        </p>
-                        <p className="mt-1 whitespace-pre-wrap text-sm text-red-700">
-                            {current.rejection_reason}
-                        </p>
-                    </div>
-                )}
-
-                {/* excerpt */}
-                {current.excerpt && (
-                    <section>
-                        <h3 className={sectionTitleClass}>Excerpt</h3>
-                        <p className="text-sm italic leading-6 text-gray-600">{current.excerpt}</p>
-                    </section>
-                )}
-
-                {/* content: plain text until the editor step switches this to rendered HTML */}
-                <section>
-                    <h3 className={sectionTitleClass}>Content</h3>
-                    <div className="whitespace-pre-wrap break-words text-sm leading-7 text-gray-800">
-                        {current.content || 'No content.'}
-                    </div>
-                </section>
-
-                {/* activity section */}
-                <section>
-                    <button type="button" 
-                    onClick={()=>setIsActivityOpen((open)=>!open)}
-                    aria-expanded={isActivityOpen}
-                    className="flex w-full cursor-pointer items-center justify-between rounded-lg py-1 text-left"
-                    >
-                        <span className={sectionTitleClass.replace('mb-2 ', '')}>Activity</span>
-                        <ChevronDown
-                            size={16}
-                            className={`text-gray-400 transition ${isActivityOpen ? 'rotate-180' : ''}`}
+                {/* ── article: how readers will see it ── */}
+                <article className="min-w-0">
+                    {/* cover image area (placeholder until media uploads, Phase 4) */}
+                     {current.cover_image_detail?.url ? (
+                        <img
+                            src={current.cover_image_detail.url}
+                            alt={current.cover_image_detail.alt_text}
+                            width={current.cover_image_detail.width ?? undefined}
+                            height={current.cover_image_detail.height ?? undefined}
+                            className="mb-6 aspect-[16/7] w-full rounded-xl bg-gray-100 object-cover"
                         />
-                    </button>
-                    {isActivityOpen && (
-                        <div className="mb-3">
-                            <BlogActivityTimeline blogId={blog.id} currentUserId={user?.id} />
+                    ) : (
+                        <div className="mb-6 flex aspect-[16/7] items-center justify-center rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 text-gray-400">
+                            <div className="flex flex-col items-center gap-1.5">
+                                <FileText size={28} />
+                                <span className="text-xs">No cover image</span>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="mx-auto max-w-[68ch]">
+                        {current.category_detail && (
+                            <div className="mb-3">
+                                <BlogCategoryBadge category={current.category_detail} />
+                            </div>
+                        )}
+
+                        <h1 className="text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">
+                            {current.title}
+                        </h1>
+
+                        <p className="mt-3 text-sm text-gray-500">
+                            By <span className="font-medium capitalize text-gray-700">{bylineName}</span>
+                            <span className="mx-1.5">·</span>
+                            <time dateTime={current.published_at ?? current.created_at}>{bylineDate}</time>
+                        </p>
+
+                        {current.excerpt && (
+                            <p className="mt-5 text-base leading-7 text-gray-600">
+                                {current.excerpt}
+                            </p>
+                        )}
+
+                        <hr className="my-6 border-gray-100" />
+
+                        {/* cleaned HTML, styled the same as the editor */}
+                        <RichTextContent html={current.content} className="text-[15px]" />
+                    </div>
+                </article>
+
+                {/* ── review panel (first on mobile, sticky on desktop) ── */}
+                <aside className="order-first flex flex-col gap-4 tablet:order-none tablet:sticky tablet:top-0 tablet:self-start">
+
+                    {/* status + actions */}
+                    <section className={panelClass}>
+                        <h2 className={panelTitleClass}>Status</h2>
+                        <div className="mt-2">
+                            <BlogStatusBadge status={current.status} />
                         </div>
 
-                    )}
-                </section>
+                        {showRejectionReason && (
+                            <div className="mt-3 rounded-lg border border-red-100 bg-red-50 p-3">
+                                <p className="text-xs font-semibold text-red-700">Rejection reason</p>
+                                <p className="mt-1 whitespace-pre-wrap text-sm text-red-700">{current.rejection_reason}</p>
+                            </div>
+                        )}
 
+                        {actionNote && (
+                            <p className="mt-3 flex items-start gap-2 text-xs leading-5 text-gray-500">
+                                <Info size={14} className="mt-0.5 shrink-0 text-gray-400" />
+                                {actionNote}
+                            </p>
+                        )}
 
-                {/* actions */}
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-4">
-                    <button
-                        type="button"
-                        onClick={handleClose}
-                        className={`cursor-pointer border border-gray-200 text-gray-600 hover:bg-gray-50 ${footerButtonClass}`}
-                    >
-                        Close
-                    </button>
+                        <div className="mt-4 flex flex-col gap-2">
+                            {availableTransitions.map(({transition, disabledReason})=>{
+                                const config = BLOG_TRANSITION_CONFIG[transition];
+                                return (
+                                    <ActionButton
+                                        key={transition}
+                                        onClick={()=>handleTransitionClick(transition)}
+                                        disabledReason={isBusy ? 'Please wait...' : disabledReason}
+                                        className={actionButtonClass}
+                                        enabledClassName={config.className}
+                                        disabledClassName="cursor-not-allowed bg-gray-100 text-gray-400"
+                                    >
+                                        {config.label}
+                                    </ActionButton>
+                                )
+                            })}
 
-                    <div className="flex flex-wrap items-center justify-end gap-2">
-                        {availableTransitions.map(({transition, disabledReason})=>{
-                            const config = BLOG_TRANSITION_CONFIG[transition];
-                            return (
-                                <ActionButton
-                                    key={transition}
-                                    onClick={()=>handleTransitionClick(transition)}
-                                    disabledReason={isBusy ? 'Please wait...' : disabledReason}
-                                    className={footerButtonClass}
-                                    enabledClassName={config.className}
-                                    disabledClassName="cursor-not-allowed bg-gray-100 text-gray-400"
-                                >
-                                    {config.label}
-                                </ActionButton>
-                            )
-                        })}
+                            <ActionButton
+                                onClick={()=>onEdit(current)}
+                                disabledReason={getEditBlockedReason(current, user)}
+                                className={actionButtonClass}
+                                enabledClassName="bg-blue-600 text-white hover:bg-blue-900"
+                                disabledClassName="cursor-not-allowed border border-gray-100 text-gray-300"
+                            >
+                                Edit
+                            </ActionButton>
+                        </div>
+                    </section>
 
-                        <ActionButton
-                            onClick={()=>onEdit(current)}
-                            disabledReason={getEditBlockedReason(current, user)}
-                            className={footerButtonClass}
-                            enabledClassName="border border-gray-200 text-blue-700 hover:bg-blue-700 hover:text-white"
-                            disabledClassName="cursor-not-allowed border border-gray-100 text-gray-300"
+                    {/* details */}
+                    <section className={panelClass}>
+                        <h2 className={panelTitleClass}>Details</h2>
+                        <dl className="mt-2 divide-y divide-gray-50">
+                            <DetailRow
+                                label="Category"
+                                value={current.category_detail?.name
+                                    ? <span className="capitalize">{current.category_detail.name}</span>
+                                    : <span className="text-gray-400">Uncategorised</span>}
+                            />
+                            {isAdmin && (
+                                <DetailRow
+                                    label="Contributor"
+                                    value={<span className="capitalize">{current.contributor_name}</span>}
+                                />
+                            )}
+                            <DetailRow label="Created" value={formatDate(current.created_at)} />
+                            <DetailRow label="Submitted" value={formatDate(current.submitted_at)} />
+                            <DetailRow label="Published" value={formatDate(current.published_at)} />
+                            <DetailRow label="Last updated" value={formatDate(current.updated_at)} />
+                        </dl>
+                    </section>
+
+                    {/* activity (fetched only when opened) */}
+                    <section className={panelClass}>
+                        <button
+                            type="button"
+                            onClick={()=>setIsActivityOpen((open)=>!open)}
+                            aria-expanded={isActivityOpen}
+                            className="flex w-full cursor-pointer items-center justify-between text-left"
                         >
-                            Edit
-                        </ActionButton>
-                    </div>
-                </div>
+                            <h2 className={panelTitleClass}>Activity</h2>
+                            <ChevronDown
+                                size={16}
+                                className={`text-gray-400 transition ${isActivityOpen ? 'rotate-180' : ''}`}
+                            />
+                        </button>
+
+                        {isActivityOpen && (
+                            <div className="mt-3 max-h-80 overflow-y-auto pr-1">
+                                <BlogActivityTimeline blogId={current.id} currentUserId={user?.id} />
+                            </div>
+                        )}
+                    </section>
+                </aside>
             </div>
         </Modal>
 

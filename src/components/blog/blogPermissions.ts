@@ -120,6 +120,7 @@ function getTransitionRuleDenial(blog:Blog, user:Viewer, transition:BlogTransiti
 // saved (the serializer rejects empty content), so only category is checked.
 function getSubmissionBlockedReason(blog:Blog) : string | null {
     if (!blog.category) return 'Choose a category before submitting.';
+    if (!blog.cover_image) return 'Add a cover image before submitting.'
     return null;
 }
 

@@ -11,10 +11,12 @@ import DashboardLayout from './components/layout/DashboardLayout'
 import CategoryPage from './components/category/pages/CategoryPage'
 import BlogPage from './components/blog/pages/BlogPage'
 import BlogFormPage from './components/blog/pages/BlogFormPage'
+import RouteErrorPage from './components/pages/RouteErrorPage'
+import UserPage from './components/category/users/pages/UserPage'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <>
+    <Route errorElement={<RouteErrorPage/>}>
       <Route path='/unauthorized' element={<Unauthorized/>}  />
 
       {/*guest route  */}
@@ -27,22 +29,28 @@ const router = createBrowserRouter(
       {/* Authenticated routes */}
       <Route element={<ProtectedRoutes/>}>
         <Route element={<DashboardLayout/>}>
-            <Route path='/dashboard'  element={<DashboardPage/>} />
-            <Route path='/categories'  element={<CategoryPage/>} />
-            <Route path='/blogs'  element={<BlogPage/>} />
-            <Route path='/blogs/new'  element={<BlogFormPage/>} />
-            <Route path='/blogs/:id/edit'  element={<BlogFormPage/>} />
+          <Route errorElement={<RouteErrorPage/>}>
+              <Route path='/dashboard'  element={<DashboardPage/>} />
+              <Route path='/categories'  element={<CategoryPage/>} />
+              <Route path='/blogs'  element={<BlogPage/>} />
+              <Route path='/blogs/new'  element={<BlogFormPage/>} />
+              <Route path='/blogs/:id/edit'  element={<BlogFormPage/>} />
+            </Route>
         </Route>
       </Route>
 
       {/* Admin only */}
       <Route element={<ProtectedRoutes allowedRoles={['admin']}/>}>
-        <Route path='/admin/users'  element={<DashboardPage/>} />
+       <Route element={<DashboardLayout/>}>
+        <Route errorElement={<RouteErrorPage/>}>
+          <Route path='/admin/users'  element={<UserPage/>} />
+        </Route>
+        </Route>
       </Route>
 
       {/* unknown routes */}
       <Route path='*' element={<NotFound/>} />
-    </>
+    </Route>
   )
 )
 

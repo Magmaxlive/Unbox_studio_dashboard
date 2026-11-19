@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import CreateButton from '../../ui/CreateButton'
 import UseDebounce from '../../../hooks/UseDebounce'
@@ -6,7 +6,7 @@ import BlogFilters from '../BlogFilters'
 import Pagination from '../../ui/Pagination'
 import type { Blog, BlogFilter,BlogStatus } from '../../../types/Blogs'
 import { useBlogs,useDeleteBlog } from '../../../hooks/queries/blogs'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { handleMutationError } from '../../../utlis/handleMutationError'
 import BlogTable from '../BlogTable'
@@ -14,34 +14,94 @@ import ConfirmDialog from '../../ui/ConfirmDialog'
 import BlogViewModal from '../BlogViewModal'
 import { startOfLocalDayISO,startOfNextLocalDayISO } from '../../../utlis/dateRange'
 
-
 const PAGE_SIZE = 12
+
+// URL values can be edited by hand or come from old bookmarks: validate them.
+const BLOG_STAUSES : BlogStatus[] = ['draft','pending','published','rejected','archived']
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const SLUG_PATTERN = /^[-a-zA-Z0-9_]+$/;   // Django SlugField characters
+
+interface UpdateParamsOptions {
+    // any filter change returns to page 1
+    resetPage ? : boolean;
+    // replace the current history entry instead of adding one
+    replace ? : boolean;
+}
 
 const BlogPage = () => {
     const {user} = useAuth()
     const isAdmin = user?.role === 'admin';
     const navigate = useNavigate();
+    const location = useLocation();
 
-    // filter + pagination states
-    const [currentPage,setCurrentPage] = useState(1)
+    // filters live in the url
+    const [searchParams,setSearchParams] = useSearchParams();
+
+    const pageParam = Number(searchParams.get('page'));
+    const currentPage = Number.isInteger(pageParam) && pageParam > 1 ? pageParam : 1;
+
+    const statusParam = searchParams.get('status') ?? '';
+    const status : BlogStatus | '' = BLOG_STAUSES.includes(statusParam as BlogStatus)
+        ? statusParam as BlogStatus
+        : '';
+
+    const categoryParam = searchParams.get('category') ?? '';
+    const categorySlug = SLUG_PATTERN.test(categoryParam) ? categoryParam : '';
+
+    const fromParam = searchParams.get('from') ?? '';
+    const toParam = searchParams.get('to') ?? '';
+    const dateFrom = isAdmin && DATE_PATTERN.test(fromParam) ? fromParam : '';   // "YYYY-MM-DD"
+    const dateTo = isAdmin && DATE_PATTERN.test(toParam) ? toParam : '';         // "YYYY-MM-DD"
+
+    const urlSearch = (searchParams.get('search') ?? '').trim();
+
+    const updateParams = (
+        changes : Record<string, string | null>,
+        { resetPage = true, replace = false } : UpdateParamsOptions = {},
+    ) => {
+        setSearchParams((previous)=>{
+            const next = new URLSearchParams(previous);
+            Object.entries(changes).forEach(([key, value])=>{
+                if (value) next.set(key, value);
+                else next.delete(key);
+            });
+            if (resetPage) next.delete('page');
+            return next;
+        }, { replace });
+    }
+
+
+    
     const [searchInput,setSearchInput] = useState('')
-    const [status,setStatus] = useState<BlogStatus | ''>('')
-    const [category,setCategory] = useState('')
-    const [dateFrom,setDateFrom] = useState('')
-    const [dateTo,setDateTo] = useState('')
+    // debounced search value reached API
+    const debouncedSearch = UseDebounce(searchInput.trim())
+
+        // typing → URL (replace: no history entry per keystroke pause)
+
+    useEffect(()=>{
+        if (debouncedSearch !== urlSearch){
+            updateParams({search : debouncedSearch || null}, {replace : true})
+        }
+    },[debouncedSearch])
+
+    useEffect(()=>{
+        if (urlSearch !== searchInput.trim()){
+            setSearchInput(urlSearch)
+        }
+    },[urlSearch])
+    
 
     // delete state
     const [blogToDelete,setBlogToDelete] = useState<Blog | null>(null);
     const [blogToView,setBlogToView] = useState<Blog | null>(null);
 
-    // debounced search value reached API
-    const debouncedSearch = UseDebounce(searchInput.trim())
+    
 
     // build filters with only the values that are actually set
     const filters : BlogFilter = {page:currentPage};
     if (debouncedSearch) filters.search = debouncedSearch;
     if (status) filters.status = status;
-    if (category) filters.category = category;
+    if (categorySlug) filters.category_slug = categorySlug;
 
     // date range : converted to timestamp in viewers timezone
     if (isAdmin && dateFrom){
@@ -64,36 +124,34 @@ const BlogPage = () => {
     const totalCount = data?.count ?? 0;
     const totalPages = Math.ceil(totalCount/PAGE_SIZE);
 
-    const hasActiveFilters = Boolean(debouncedSearch || status || category)
+        const hasActiveFilters = Boolean(urlSearch || status || categorySlug || dateFrom || dateTo);
+
+    // ── navigation: remember this filtered list so the editor can return to it ──
+    const listUrl = `/blogs${location.search}`;
 
     // handles every filter change return to page 1
-    const handleSearchChange = (value:string)=>{
-        setSearchInput(value);
-        setCurrentPage(1)
+    const handlePageChange = (page:number) => {
+        updateParams({ page : page > 1 ? String(page) : null }, { resetPage : false });
     }
 
     const handleCreate = ()=>{
-        navigate('/blogs/new/')
+        navigate('/blogs/new/',{state : {returnTo : listUrl}})
     }
 
     const handleStatusChange = (value:BlogStatus | '')=>{
-        setStatus(value);
-        setCurrentPage(1)
+        updateParams({status : value || null});
     }
 
-    const handleCategoryChange = (value:string) => {
-        setCategory(value);
-        setCurrentPage(1)
+    const handleCategoryChange = (slug:string) => {
+        updateParams({category : slug || null});
     }
 
     const handleDateFromChange = (value:string) =>{
-        setDateFrom(value);
-        setCurrentPage(1)
+        updateParams({from : value || null});
     }
 
     const handleDateToChange = (value:string) =>{
-        setDateTo(value);
-        setCurrentPage(1)
+        updateParams({to : value || null});
     }
 
     const handleView = (blog:Blog)=>{
@@ -101,7 +159,7 @@ const BlogPage = () => {
     }
 
     const handleEdit = (blog:Blog)=>{
-        navigate(`/blogs/${blog.id}/edit`)
+        navigate(`/blogs/${blog.id}/edit`,{state : {returnTo : listUrl}})
     }
 
     const handleEditFromView = (blog:Blog)=>{
@@ -126,7 +184,7 @@ const BlogPage = () => {
             onSuccess : () => {
                 toast.success('Blog deleted successfully');
                 if(isLastitemOnPage){
-                    setCurrentPage((page)=>page-1)
+                    handlePageChange(currentPage - 1);
                 }
                 setBlogToDelete(null)
             },
@@ -140,11 +198,7 @@ const BlogPage = () => {
     // clear filters
     const handleClearFilters = () =>{
         setSearchInput('');
-        setStatus('');
-        setCategory('');
-        setDateFrom('');
-        setDateTo('');
-        setCurrentPage(1);
+        setSearchParams(new URLSearchParams());
     }
 
 // result area
@@ -210,10 +264,10 @@ const BlogPage = () => {
 
         <BlogFilters
             search={searchInput}
-            category={category}
+            categorySlug={categorySlug}
             status={status}
             onCategoryChange={handleCategoryChange}
-            onSearchChange={handleSearchChange}
+            onSearchChange={setSearchInput}
             onStatusChange={handleStatusChange}
             onClear={handleClearFilters}
             isAdmin={isAdmin}
@@ -229,7 +283,7 @@ const BlogPage = () => {
             <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
-                onPageChange={setCurrentPage}
+                onPageChange={handlePageChange}
                 isLoading={isFetching}
             />
         )}

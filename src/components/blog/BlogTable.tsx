@@ -19,7 +19,8 @@ interface BlogTableProps{
 
 const thClass = "px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500"
 const tdClass = "px-4 py-3 align-middle"
-const actionBaseClass = "rounded-lg border px-3 py-1.5 text-sm font-medium transition capitalize cursor-pointer"
+const actionBaseClass = "rounded-lg px-3 py-1.5 text-sm font-medium transition capitalize"
+const actionDisabledClass = "cursor-not-allowed bg-gray-100 text-gray-400"
 
 
 const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:BlogTableProps) => {
@@ -29,7 +30,7 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:
             <thead className="border-b border-gray-200 bg-gray-50">
                 <tr>
                 <th scope="col" className={`${thClass} text-left capitalize`}>blog</th>
-                <th scope="col" className={`${thClass} text-left capitalize hidden lg:table-cell`}>excerpt</th>
+                
                 <th scope="col" className={`${thClass} text-left capitalize`}>category</th>
                 {isAdmin && (
                     <th scope="col" className={`${thClass} text-left capitalize`}>contributor</th>
@@ -45,26 +46,21 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:
                     <tr key={blog.id} className="transition hover:bg-gray-50">
                         {/* blog : thumbnail + title + excerpt */}
                         <td className={tdClass}>
-                            <div className="flex items-center gap-3">
-                                {/* placeholder cover image */}
-                                <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-400">
-                                    <FileText size={20} />
-                                </div>
-                                <div className="min-w-0 max-w-xs">
-                                    <div className="truncate capitalize font-medium text-gray-900" title={blog.title}>
-                                        {blog.title}
+                                {blog.cover_image_detail?.thumbnail_url ? (
+                                    <img
+                                        src={blog.cover_image_detail.thumbnail_url}
+                                        alt=""
+                                        loading="lazy"
+                                        className="size-14 shrink-0 rounded-lg bg-gray-100 object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-400">
+                                        <FileText size={20} />
                                     </div>
-                                   
-                                </div>
-                            </div>
+                                )}
                         </td>
 
-                        {/* excerpt */}
-                        <td className={`${tdClass} hidden lg:table-cell`}>
-                             <p className="max-w-[250px] truncate text-xs text-gray-500">
-                                {blog.excerpt || 'No excerpt'}
-                            </p>
-                        </td>
+                       
 
                         {/* category */}
 
@@ -98,11 +94,12 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:
 
                         {/* actions */}
                         <td className={`${tdClass} text-right`}>
-                            <div className="flex items-center justify-end gap-2">
+                            <div className="flex items-center justify-start gap-2">
                                 <ActionButton
                                     onClick={()=>onView(blog)}
-                                    className={`${actionBaseClass} border-gray-200`}
-                                    enabledClassName="text-gray-700 hover:bg-gray-900 hover:text-white"
+                                    className={actionBaseClass}
+                                    enabledClassName="bg-gray-800 text-white hover:bg-gray-900"
+                                    disabledClassName={actionDisabledClass}
                                 >
                                     View
                                 </ActionButton>
@@ -110,8 +107,9 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:
                                 <ActionButton
                                  onClick={()=>onEdit(blog)}
                                  disabledReason={getEditBlockedReason(blog,user)}
-                                 className={actionBaseClass}
-                                 enabledClassName="border-gray-200 text-blue-700 hover:bg-blue-700 hover:text-white"
+                                  className={actionBaseClass}
+                                    enabledClassName="bg-blue-600 text-white hover:bg-blue-900"
+                                    disabledClassName={actionDisabledClass}
                                  >
                                     edit
                                 </ActionButton>
@@ -120,7 +118,8 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:
                                     onClick={()=>onDelete(blog)}
                                     disabledReason={getDeleteBlockedReason(blog,user)}
                                     className={actionBaseClass}
-                                    enabledClassName="border-red-100 text-red-600 hover:bg-red-600 hover:text-white"
+                                    enabledClassName="bg-red-600 text-white hover:bg-red-700"
+                                    disabledClassName={actionDisabledClass}
                                 >
                                     Delete
                                 </ActionButton>

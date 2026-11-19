@@ -90,14 +90,14 @@ const CategoryList = ({categories,handleEdit,onDelete,isFiltered=false}:Category
 
               {isAdmin && (
                 <div className="flex items-center gap-2">
-                  <button type='button' onClick={()=> handleEdit(category)} className="rounded-lg border border-gray-200 cursor-pointer px-3 py-1.5 text-sm font-medium text-blue-700 transition hover:bg-blue-700 hover:text-white">
+                  <button type='button' onClick={()=> handleEdit(category)} className="rounded-lg cursor-pointer px-3 py-1.5 text-sm font-medium bg-blue-600 text-white hover:bg-blue-900 transition">
                     Edit
                   </button>
                   <ActionButton
                     disabledReason={disabledReason}
                     onClick={() => onDelete(category.id)}
                     className="rounded-lg border px-3 py-1.5 text-sm font-medium transition"
-                    enabledClassName="border-red-100 text-red-600 hover:bg-red-600 hover:text-white"
+                    enabledClassName="bg-red-600 text-white hover:bg-red-700"
                   >
                     Delete
                   </ActionButton>

@@ -8,7 +8,7 @@ interface BlogFilterProps{
     isAdmin : boolean;
     search : string;
     status : BlogStatus | '';
-    category : string;
+    categorySlug : string;
     dateFrom: string;
     dateTo: string;
     onSearchChange : (value:string) => void;
@@ -22,10 +22,10 @@ interface BlogFilterProps{
 const selectClass = 'w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-700 outline-none transition focus:border-gray-900 disabled:cursor-not-allowed disabled:opacity-50 sm:w-48'
 const dateInputClass = "w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition focus:border-gray-900 sm:w-44"
 
-const BlogFilters = ({isAdmin,search,status,category,dateFrom,dateTo,onSearchChange,onStatusChange,onCategoryChange,onDateToChange,onDateFromChange,onClear}:BlogFilterProps) => {
+const BlogFilters = ({isAdmin,search,status,categorySlug,dateFrom,dateTo,onSearchChange,onStatusChange,onCategoryChange,onDateToChange,onDateFromChange,onClear}:BlogFilterProps) => {
     const today = todayInputValue();
     const {data:categories=[],isLoading:categoriesLoading,isError:categoriesError} = useCategoryOptions();
-    const hasActiveFilters = Boolean(search || status || category || dateFrom || dateTo) 
+    const hasActiveFilters = Boolean(search || status || categorySlug || dateFrom || dateTo) 
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 ">
         <div className="flex flex-col  gap-3 sm:flex-row sm:items-center">
@@ -58,14 +58,14 @@ const BlogFilters = ({isAdmin,search,status,category,dateFrom,dateTo,onSearchCha
             {/* category */}
 
             <select 
-                value={category}
+                value={categorySlug}
                 onChange={(e)=>onCategoryChange(e.target.value)}
                 aria-label="Filter by category"
                 className={selectClass}
             >
                 <option value="">{categoriesLoading ? 'Loading Categories' : categoriesError ? 'Categories unavailable' : 'All Categories'}</option>
                 {categories.map((cat)=>(
-                    <option key={cat.id} className="capitalize" value={cat.id}>{cat.name}</option>
+                    <option key={cat.id} className="capitalize" value={cat.slug}>{cat.name}</option>
                 ))}
             </select>
 

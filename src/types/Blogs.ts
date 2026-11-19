@@ -6,6 +6,7 @@ export interface BlogFilter{
     page?:number;
     status?:BlogStatus;
     category?:string;
+    category_slug?:string;
     search?:string;
     ordering?:string;
     created_after?:string;
@@ -30,6 +31,7 @@ export interface Blog{
     content : string;
     excerpt : string;
     cover_image : string | null;
+    cover_image_detail : BlogCoverImage | null;
     status : BlogStatus;
     reviewed_by : string | null;
     reviewed_at : string | null;
@@ -46,4 +48,13 @@ export interface BlogPayload{
     content : string;
     excerpt : string;
     cover_image : string | null;
+}
+
+export interface BlogCoverImage{
+    id:string;
+    url:string | null;
+    thumbnail_url : string | null;
+    width : number | null;
+    height : number | null;
+    alt_text : string;
 }

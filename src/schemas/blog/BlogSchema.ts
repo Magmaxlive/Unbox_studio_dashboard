@@ -1,5 +1,12 @@
 import z from "zod";
 
+const coverImageSchema = z.object({
+    id : z.string(),
+    url : z.string().nullable(),
+    thumbnail_url : z.string().nullable(),
+    alt_text : z.string().max(300,'Alt text must be 300 characters or fewer.')
+})
+
 export const blogSchema = z.object({
 
     title : z.string()
@@ -14,7 +21,10 @@ export const blogSchema = z.object({
 
     content : z.string()
     .trim()
-    .min(1,'Content is required.')
+    .min(1,'Content is required.'),
+
+    cover_image : coverImageSchema.nullable(),
 })
 
 export type BlogFormValues = z.infer<typeof blogSchema>
+export type CoverImageValue = z.infer<typeof coverImageSchema>
