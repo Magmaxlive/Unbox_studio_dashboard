@@ -12,7 +12,8 @@ import CategoryPage from './components/category/pages/CategoryPage'
 import BlogPage from './components/blog/pages/BlogPage'
 import BlogFormPage from './components/blog/pages/BlogFormPage'
 import RouteErrorPage from './components/pages/RouteErrorPage'
-import UserPage from './components/category/users/pages/UserPage'
+import UserPage from './components/users/pages/UserPage'
+
 
 const router = createBrowserRouter(
   createRoutesFromElements(

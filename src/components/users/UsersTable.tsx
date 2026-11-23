@@ -1,5 +1,5 @@
-import type { User } from "../../../types/Users"
-import ActionButton from "../../ui/ActionButton"
+import type { User } from "../../types/Users";
+import ActionButton from "../ui/ActionButton";
 import UserRoleBadge from "./UserRoleBadge";
 
 interface UserTableProps {
