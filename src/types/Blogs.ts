@@ -12,6 +12,7 @@ export interface BlogFilter{
     ordering?:string;
     created_after?:string;
     created_before?:string;
+    page_size?:number;
 }
 
 export interface BlogCategorySummary{

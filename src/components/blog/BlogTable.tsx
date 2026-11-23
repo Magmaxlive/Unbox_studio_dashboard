@@ -7,11 +7,18 @@ import { getEditBlockedReason,getDeleteBlockedReason } from "./blogPermissions"
 import ActionButton from "../ui/ActionButton"
 import type { AuthUser } from "../../api/auth"
 
+interface BlogSelection {
+    selectedIds : Set<string>;
+    onToggle : (id:string) => void;
+    onTogglePage : (ids:string[],checked:boolean) => void;
+}
+
 interface BlogTableProps{
     blogs : Blog[];
     user: AuthUser | null;
     isAdmin : boolean;
     isFetching ? : boolean;
+    selection? : BlogSelection | null;
     onView : (blog:Blog) => void;
     onEdit : (blog:Blog) => void;
     onDelete : (blog:Blog) => void;
@@ -23,12 +30,30 @@ const actionBaseClass = "rounded-lg px-3 py-1.5 text-sm font-medium transition c
 const actionDisabledClass = "cursor-not-allowed bg-gray-100 text-gray-400"
 
 
-const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:BlogTableProps) => {
+const BlogTable = ({blogs,isAdmin,isFetching=false,selection=null,onView,onEdit,onDelete,user}:BlogTableProps) => {
+    const pageIds = blogs.map((blog)=>blog.id);
+    const selectedOnPage = selection ? pageIds.filter((id)=>selection.selectedIds.has(id)).length : 0;
+    const allOnPageSelected = pageIds.length > 0 && selectedOnPage === pageIds.length;
+
   return (
     <div className={`overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm transition-opacity ${isFetching ? 'opacity-60':''}`}>
         <table className="w-full min-w-[760px] text-sm">
             <thead className="border-b border-gray-200 bg-gray-50">
                 <tr>
+                    {selection && (
+                        <th scope="col" className={`${thClass} w-10`}>
+                            <input
+                                type="checkbox"
+                                aria-label="Select all blogs on this page"
+                                checked={allOnPageSelected}
+                                ref={(el)=>{ if (el) el.indeterminate = selectedOnPage > 0 && !allOnPageSelected; }}
+                                onChange={(e)=>selection.onTogglePage(pageIds, e.target.checked)}
+                                className="size-4 cursor-pointer accent-gray-900"
+                            />
+                        </th>
+                    )}
+
+                
                 <th scope="col" className={`${thClass} text-left capitalize`}>blog</th>
                 
                 <th scope="col" className={`${thClass} text-left capitalize`}>category</th>
@@ -37,7 +62,9 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:
                 )}
                 <th scope="col" className={`${thClass} text-left capitalize`}>status</th>
                 <th scope="col" className={`${thClass} text-left capitalize`}>created</th>
-                <th scope="col" className={`${thClass} text-left capitalize`}>actions</th>
+                {!selection && (
+                        <th scope="col" className={`${thClass} text-left capitalize`}>actions</th>
+                )}
                 </tr>
             </thead>
 
@@ -45,7 +72,19 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:
                 {blogs.map((blog)=>(
                     <tr key={blog.id} className="transition hover:bg-gray-50">
                         {/* blog : thumbnail + title + excerpt */}
+                        {selection && (
+                                    <td className={`${tdClass} w-10`}>
+                                        <input
+                                            type="checkbox"
+                                            aria-label={`Select ${blog.title}`}
+                                            checked={selection.selectedIds.has(blog.id)}
+                                            onChange={()=>selection.onToggle(blog.id)}
+                                            className="size-4 cursor-pointer accent-gray-900"
+                                        />
+                                    </td>
+                                )}
                         <td className={tdClass}>
+                        
                                 {blog.cover_image_detail?.thumbnail_url ? (
                                     <img
                                         src={blog.cover_image_detail.thumbnail_url}
@@ -93,7 +132,9 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:
                         </td>
 
                         {/* actions */}
-                        <td className={`${tdClass} text-right`}>
+                        {!selection && (
+                            <td className={`${tdClass} text-right`}>
+
                             <div className="flex items-center justify-start gap-2">
                                 <ActionButton
                                     onClick={()=>onView(blog)}
@@ -125,6 +166,7 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,onView,onEdit,onDelete,user}:
                                 </ActionButton>
                             </div>
                         </td>
+                        )}
                     </tr>
                 ))}
             </tbody>

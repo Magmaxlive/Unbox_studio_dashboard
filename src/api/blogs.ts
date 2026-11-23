@@ -52,6 +52,6 @@ export async function bulkBlogAction(action:BlogBulkAction,ids:string[]) : Promi
 
 // move to another category
 export async function bulkBlogCategory(ids:string[],category:string) : Promise<BulkResult> {
-    const response = await api.post<BulkResult>('/blogs/bulk/category',{ids,category});
+    const response = await api.post<BulkResult>('/blogs/bulk/category/',{ids,category});
     return response.data;
 }

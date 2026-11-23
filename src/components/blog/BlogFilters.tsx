@@ -6,6 +6,7 @@ import { todayInputValue } from "../../utlis/dateRange";
 
 interface BlogFilterProps{
     isAdmin : boolean;
+    showStatusFilter? : boolean;
     search : string;
     status : BlogStatus | '';
     categorySlug : string;
@@ -22,7 +23,7 @@ interface BlogFilterProps{
 const selectClass = 'w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-700 outline-none transition focus:border-gray-900 disabled:cursor-not-allowed disabled:opacity-50 sm:w-48'
 const dateInputClass = "w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition focus:border-gray-900 sm:w-44"
 
-const BlogFilters = ({isAdmin,search,status,categorySlug,dateFrom,dateTo,onSearchChange,onStatusChange,onCategoryChange,onDateToChange,onDateFromChange,onClear}:BlogFilterProps) => {
+const BlogFilters = ({isAdmin,showStatusFilter=true,search,status,categorySlug,dateFrom,dateTo,onSearchChange,onStatusChange,onCategoryChange,onDateToChange,onDateFromChange,onClear}:BlogFilterProps) => {
     const today = todayInputValue();
     const {data:categories=[],isLoading:categoriesLoading,isError:categoriesError} = useCategoryOptions();
     const hasActiveFilters = Boolean(search || status || categorySlug || dateFrom || dateTo) 
@@ -43,6 +44,7 @@ const BlogFilters = ({isAdmin,search,status,categorySlug,dateFrom,dateTo,onSearc
             </div>
 
             {/* status */}
+                {showStatusFilter && (
             <select 
                 value={status}
                 onChange={(e)=>onStatusChange(e.target.value as BlogStatus | '')}
@@ -54,6 +56,7 @@ const BlogFilters = ({isAdmin,search,status,categorySlug,dateFrom,dateTo,onSearc
                     <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
             </select>
+            )}
 
             {/* category */}
 

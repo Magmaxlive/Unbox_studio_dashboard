@@ -70,4 +70,4 @@ export function getAvailableBulkModes(isAdmin:boolean) : BlogBulkMode[] {
     return isAdmin ? ['archive','category','delete','restore'] : ['category','delete'];
 }
 
-export const pluraliseBlogs = (count:number) => `${count} blog${count === 1} ? '' : 's'`
+export const pluraliseBlogs = (count:number) => `${count} blog${count === 1 ? '' : 's'} `
