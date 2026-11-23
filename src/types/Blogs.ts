@@ -5,6 +5,7 @@ export type BlogTransition = | 'submit' | 'withdraw' | 'publish' | 'reject' | 'a
 export interface BlogFilter{
     page?:number;
     status?:BlogStatus;
+    status_in?:string;
     category?:string;
     category_slug?:string;
     search?:string;
@@ -57,4 +58,11 @@ export interface BlogCoverImage{
     width : number | null;
     height : number | null;
     alt_text : string;
+}
+
+export type BlogBulkAction = "archive" | "restore" | "delete";
+
+export interface BulkResult{
+    succeeded : string[];
+    skipped : { id : string; title : string; reason : string }[];
 }

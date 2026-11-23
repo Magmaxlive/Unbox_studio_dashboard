@@ -198,7 +198,7 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
             try {
                 saved = initialBlog
                 ? await updateMutation.mutateAsync({id : initialBlog.id , data : fields})
-                : await createMutation.mutateAsync({...fields , cover_image : null})
+                : await createMutation.mutateAsync({...fields})
             } catch (error) {
                 handleMutationError(error,{setFieldErrors : setApifieldErrors});
                 return;
