@@ -36,7 +36,7 @@ export interface MoveContentPayload{
     deactivate_source : boolean;
 }
 
-export interface MoveContentPayload{
+export interface MoveContentResult{
     moved : { blogs : number ; videos : number };
     drafts_left : { blogs : number ; videos : number };
     deactivated : boolean;
