@@ -1,6 +1,6 @@
 import {useMutation,useQuery,useQueryClient} from '@tanstack/react-query'
-import { getCategories,getCategoryOption,createCategory,retrieveCategory,updateCategory,deleteCategory } from '../../api/categories'
-import type { CategoryPayload,CategoryFilter } from '../../types/Category'
+import { getCategories,getCategoryOption,createCategory,retrieveCategory,updateCategory,deleteCategory,moveCategoryConent } from '../../api/categories'
+import type { CategoryPayload,CategoryFilter,MoveContentPayload } from '../../types/Category'
 
 export const categoryKeys = {
     all: ["categories"] as const,
@@ -89,4 +89,21 @@ export function useDeleteCategory(){
             });
         }
     })
+}
+
+// move all content out of category (admin)
+export function useMoveCategoryContent(){
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn : ({id,data}:{id:string,data:MoveContentPayload}) => moveCategoryConent(id,data),
+        onSettled : () => {
+            // usage counts, active state, options for every dropdown
+            queryClient.invalidateQueries({ queryKey : categoryKeys.all })
+            // blogs show a different category now. Uses the base key instead of
+            // importing blogKeys, which would make the two hook files import each other.
+            queryClient.invalidateQueries({ queryKey : ['blogs'] });
+            // later : ['videos'] once the video dashboard exists
+        },
+    });
 }
