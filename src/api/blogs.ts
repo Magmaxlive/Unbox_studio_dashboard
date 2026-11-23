@@ -1,6 +1,6 @@
 import api from "./axios";
 import type { PaginatedResponse } from "../types/PaginatedResponse";
-import type { Blog,BlogPayload,BlogFilter,BlogTransition } from "../types/Blogs";
+import type { Blog,BlogPayload,BlogFilter,BlogTransition,BlogBulkAction,BulkResult } from "../types/Blogs";
 import type { ContentActivity } from "../types/ContentActivity";
 
 // fetch blogs
@@ -41,5 +41,17 @@ export async function transitionBlog(id:string,transition:BlogTransition,reason?
 // activity history,newest first
 export async function getBlogActivity(id:string,page = 1) : Promise<PaginatedResponse<ContentActivity>>{
     const response = await api.get<PaginatedResponse<ContentActivity>>(`/blogs/${id}/activity/`,{params : {page}});
+    return response.data;
+}
+
+// bulk archive/restore/delete (per item rules apply)
+export async function bulkBlogAction(action:BlogBulkAction,ids:string[]) : Promise<BulkResult> {
+    const response = await api.post<BulkResult>(`/blogs/bulk/${action}/`,{ids});
+    return response.data;
+}
+
+// move to another category
+export async function bulkBlogCategory(ids:string[],category:string) : Promise<BulkResult> {
+    const response = await api.post<BulkResult>('/blogs/bulk/category',{ids,category});
     return response.data;
 }
