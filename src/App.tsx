@@ -1,7 +1,7 @@
 
 import './App.css'
 import LoginPage from './components/auth/pages/LoginPage'
-import { Route,RouterProvider,createBrowserRouter,createRoutesFromElements } from 'react-router-dom'
+import { Route,RouterProvider,createBrowserRouter,createRoutesFromElements,Navigate } from 'react-router-dom'
 import ProtectedRoutes from './components/auth/ProtectedRoutes'
 import DashboardPage from './components/pages/DashboardPage'
 import Unauthorized from './components/pages/Unauthorized'
@@ -32,6 +32,7 @@ const router = createBrowserRouter(
       <Route element={<ProtectedRoutes/>}>
         <Route element={<DashboardLayout/>}>
           <Route errorElement={<RouteErrorPage/>}>
+              <Route path='/' element={<Navigate to='/dashboard' replace />}/>
               <Route path='/dashboard'  element={<DashboardPage/>} />
 
               {/* categories */}
