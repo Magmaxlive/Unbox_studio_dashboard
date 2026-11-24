@@ -24,7 +24,7 @@ import {
 } from '../blogBulkActions'
 
 const PAGE_SIZE = 12;
-const BULK_PAGE_SIZE = 4;
+const BULK_PAGE_SIZE = 20;
 
 // URL values can be edited by hand or come from old bookmarks: validate them.
 const BLOG_STATUSES : BlogStatus[] = ['draft', 'pending', 'published', 'rejected', 'archived'];
