@@ -8,6 +8,7 @@ import {
   Plus,
   ArrowUpRight,
 } from "lucide-react";
+import { Link } from 'react-router-dom';
 
 const DashboardPage = () => {
   const {user} = useAuth();
@@ -47,12 +48,12 @@ const DashboardPage = () => {
 
       {/* quick actions */}
       <div className="flex flex-wrap gap-3">
-        <button className="flex gap-2 cursor-pointer items-center bg-violet rounded-lg px-4 py-3 font-semibold capitalize text-white hover:bg-violet-deep">
+        <Link to='/videos' className="flex gap-2 cursor-pointer items-center bg-violet rounded-lg px-4 py-3 font-semibold capitalize text-white hover:bg-violet-deep">
           <Plus size={18} /> submit video
-        </button>
-        <button className="flex gap-2 cursor-pointer  items-center bg-violet rounded-lg px-4 py-3 font-semibold capitalize text-white hover:bg-violet-deep">
+        </Link>
+        <Link to='/blogs' className="flex gap-2 cursor-pointer  items-center bg-violet rounded-lg px-4 py-3 font-semibold capitalize text-white hover:bg-violet-deep">
           <Plus size={18} /> submit blog
-        </button>
+        </Link>
       </div>
 
       {/* stat cards */}
