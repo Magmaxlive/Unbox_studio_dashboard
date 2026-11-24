@@ -22,6 +22,7 @@ import {
     type BulkMode,
 } from '../../bulk/bulkActions'
 import ContentFilters from '../../filters/ContentFilter'
+import VideoViewModal from '../VideoViewModal'
 
 const PAGE_SIZE = 12;
 const BULK_PAGE_SIZE = 20;
@@ -117,7 +118,7 @@ const VideoPage = () => {
     },[location.search])
 
     // view (V6b) + delete
-    const [, setVideoToView] = useState<Video | null>(null);
+    const [videoToView, setVideoToView] = useState<Video | null>(null);
     const [videoToDelete,setVideoToDelete] = useState<Video | null>(null);
 
     // ── API filters ──
@@ -236,6 +237,11 @@ const VideoPage = () => {
 
     const handleCreate = () => navigate('/videos/new', { state : { returnTo : listUrl } });
     const handleEdit = (video:Video) => navigate(`/videos/${video.id}/edit`, { state : { returnTo : listUrl } });
+
+    const handleEditFromView = (video:Video)=>{
+        setVideoToView(null);
+        handleEdit(video);
+    }
 
     const handleConfirmDelete = () => {
         if (!videoToDelete) return;
@@ -391,7 +397,17 @@ const VideoPage = () => {
             />
         )}
 
-        {/* V6b: <VideoViewModal ... /> */}
+        
+
+        {videoToView && (
+            <VideoViewModal
+                video={videoToView}
+                user={user}
+                isAdmin={isAdmin}
+                onClose={()=>setVideoToView(null)}
+                onEdit={handleEditFromView}
+            />
+        )}
 
         <ConfirmDialog
             isOpen={!!videoToDelete}

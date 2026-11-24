@@ -10,8 +10,8 @@ import { formatDuration } from './VideoTable'
 import formatDate from '../../utlis/formatDate'
 import { useVideo, useVideoTransition, videoKeys } from '../../hooks/queries/videos'
 import { getAvailableTransitions, getEditBlockedReason, getVideoActionNote } from './videoPermissions'
-import { VIDEO_TRANSITION_CONFIG } from './videoTransitions'
 import { VIDEO_NOUN } from '../bulk/bulkActions'
+import { VIDEO_TRANSITION_CONFIG } from './videoTransitions'
 
 interface VideoViewModalProps {
     video : Video;
