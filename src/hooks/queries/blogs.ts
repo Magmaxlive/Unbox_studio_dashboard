@@ -3,6 +3,7 @@ import { getBlogs,createBlogs,retrieveBlog,updateBlog,deleteBlog,getBlogActivity
 import type { BlogPayload,BlogFilter, BlogTransition } from "../../types/Blogs";
 import type { BlogBulkMode } from "../../components/blog/blogBulkActions";
 import { categoryKeys } from "./categories";
+import { isAxiosError } from 'axios'
 
 
 export const blogKeys = {
@@ -30,6 +31,8 @@ export function useBlogs(filters:BlogFilter = {}) {
         // approve/reject appears without a refresh. Stops when none are pending.
         refetchInterval : (query) =>
             query.state.data?.results.some((blog) => blog.status === 'pending') ? 30_000 : false,
+        retry : (failureCount, error) =>
+            !(isAxiosError(error) && error.response?.status === 404) && failureCount < 2,
     })
 }
 

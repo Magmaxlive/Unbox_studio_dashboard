@@ -8,6 +8,7 @@ import UseDebounce from '../../../hooks/UseDebounce'
 import { useAuth } from '../../../contexts/AuthContext'
 import { handleMutationError } from '../../../utlis/handleMutationError'
 import { startOfLocalDayISO, startOfNextLocalDayISO } from '../../../utlis/dateRange'
+import { isAxiosError } from 'axios'
 import BlogFilters from '../BlogFilters'
 import BlogTable from '../BlogTable'
 import BlogViewModal from '../BlogViewModal'
@@ -23,7 +24,7 @@ import {
 } from '../blogBulkActions'
 
 const PAGE_SIZE = 12;
-const BULK_PAGE_SIZE = 20;
+const BULK_PAGE_SIZE = 4;
 
 // URL values can be edited by hand or come from old bookmarks: validate them.
 const BLOG_STATUSES : BlogStatus[] = ['draft', 'pending', 'published', 'rejected', 'archived'];
@@ -151,6 +152,30 @@ const BlogPage = () => {
         isFetching,
     } = useBlogs(filters);
 
+        // this page stopped existing (items moved out of the list): step back, quietly
+    const pageGone = currentPage > 1 && isError && isAxiosError(error) && error.response?.status === 404;
+
+    useEffect(()=>{
+        if (pageGone) {
+            updateParams(
+                { page : currentPage > 2 ? String(currentPage - 1) : null },
+                { resetPage : false, replace : true },
+            );
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[pageGone, currentPage])
+
+     useEffect(()=>{
+        const pageGone = isError && isAxiosError(error) && error.response?.status === 404;
+        if (currentPage > 1 && pageGone) {
+            updateParams(
+                { page : currentPage > 2 ? String(currentPage - 1) : null },
+                { resetPage : false, replace : true },
+            );
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[isError, error, currentPage])
+
     const deleteMutation = useDeleteBlog();
     const bulkMutation = useBlogBulkAction();
     const { data:categoryOptions = [] } = useCategoryOptions();
@@ -235,17 +260,13 @@ const BlogPage = () => {
         if (!bulkMode) return;
 
         const ids = [...selectedIds];
-        // if everything on a later page is acted on, that page may stop existing
-        const emptiesPage = currentPage > 1 && ids.length >= blogs.length;
+        
 
         bulkMutation.mutate({ mode : bulkMode, ids, category : bulkCategory },{
             onSuccess : (result)=>{
                 showBulkSummary(result);
                 setSelectedIds(new Set());
                 setIsBulkConfirmOpen(false);
-                if (emptiesPage && result.succeeded.length >= blogs.length) {
-                    handlePageChange(currentPage - 1);
-                }
             },
             onError : (error)=>{
                 handleMutationError(error);
@@ -291,14 +312,11 @@ const BlogPage = () => {
     const handleConfirmDelete = () => {
         if (!blogToDelete) return;
 
-        const isLastItemOnPage = blogs.length === 1 && currentPage > 1;
+        
 
         deleteMutation.mutate(blogToDelete.id,{
             onSuccess : ()=>{
                 toast.success('Blog deleted successfully');
-                if (isLastItemOnPage) {
-                    handlePageChange(currentPage - 1);
-                }
                 setBlogToDelete(null);
             },
             onError : (error)=>{
@@ -310,7 +328,7 @@ const BlogPage = () => {
 
     // results area (toolbar stays mounted in every state)
     const renderContent = () => {
-        if (isLoading) {
+        if (isLoading || pageGone) {
             return <p className="text-sm text-gray-500">Loading blogs...</p>
         }
 
