@@ -83,21 +83,32 @@ const BlogTable = ({blogs,isAdmin,isFetching=false,selection=null,onView,onEdit,
                                         />
                                     </td>
                                 )}
-                        <td className={tdClass}>
-                        
-                                {blog.cover_image_detail?.thumbnail_url ? (
-                                    <img
-                                        src={blog.cover_image_detail.thumbnail_url}
-                                        alt=""
-                                        loading="lazy"
-                                        className="size-14 shrink-0 rounded-lg bg-gray-100 object-cover"
-                                    />
-                                ) : (
-                                    <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-400">
-                                        <FileText size={20} />
-                                    </div>
-                                )}
-                        </td>
+                                                {/* blog: thumbnail + title + excerpt */}
+                                        <td className={tdClass}>
+                                            <div className="flex items-center gap-3">
+                                                {blog.cover_image_detail?.thumbnail_url ? (
+                                                    <img
+                                                        src={blog.cover_image_detail.thumbnail_url}
+                                                        alt=""
+                                                        loading="lazy"
+                                                        className="size-14 shrink-0 rounded-lg bg-gray-100 object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-400">
+                                                        <FileText size={20} />
+                                                    </div>
+                                                )}
+
+                                                <div className="min-w-0 max-w-sm">
+                                                    <p className="line-clamp-1 font-medium text-gray-900">{blog.title}</p>
+                                                    {blog.excerpt && (
+                                                        <p className="mt-0.5 hidden line-clamp-1 text-xs text-gray-500 lg:block">
+                                                            {blog.excerpt}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </td>
 
                        
 
