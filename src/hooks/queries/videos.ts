@@ -19,6 +19,7 @@ export const videoKeys = {
     list : (filters:VideoFilter) => [...videoKeys.lists(), filters] as const,
     details : () => [...videoKeys.all, 'detail'] as const,
     detail : (id:string) => [...videoKeys.details(),id] as const,
+    activity : (id:string) => [...videoKeys.detail(id), 'activity'] as const,
 };
 
 const isProcessing = (video:Video) => 
