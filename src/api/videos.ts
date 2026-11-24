@@ -1,6 +1,7 @@
 import api from "./axios";
 import type { Paginated,Video,VideoFilter,VideoPayload,VideoTransition } from "../types/Videos";
 import type { BlogBulkAction,BulkResult } from "../types/Blogs";
+import { ca } from "zod/v4/locales";
 
 
 export async function getVideos(filters:VideoFilter = {}) : Promise<Paginated<Video>> {
@@ -29,5 +30,16 @@ export async function deleteVideo(id:string) : Promise<void> {
 
 export async function transitionVideo(id:string,transition:VideoTransition,reason?:string) : Promise<Video> {
     const response = await api.post<Video>(`/videos/${id}/${transition}/`,reason ? {reason} : {});
+    return response.data;
+}
+
+// bulk actions
+export async function bulkVideoAction(action:BlogBulkAction,ids:string[]) : Promise<BulkResult> {
+    const response = await api.post<BulkResult>(`/videos/bulk/${action}/`,{ ids });
+    return response.data;
+}
+
+export async function bulkVideoCategory(ids:string[],category:string) : Promise<BulkResult> {
+    const response = await api.post<BulkResult>(`/videos/bulk/category/`,{ ids , category });
     return response.data;
 }
