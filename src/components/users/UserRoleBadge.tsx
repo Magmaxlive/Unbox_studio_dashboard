@@ -1,5 +1,5 @@
 import { USER_ROLE_CONFIG } from "./userRole";
-import type { UserRole } from "../../../types/Users";
+import type { UserRole } from "../../types/Users";
 
 interface UserRoleBadgeProps{
     role : UserRole;

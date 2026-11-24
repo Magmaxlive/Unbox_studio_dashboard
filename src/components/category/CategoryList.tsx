@@ -8,9 +8,10 @@ interface CategoryListProps{
   handleEdit : (category:Category) => void;
   onDelete : (id:string) => void;
   isFiltered? : boolean;
+  onMoveContent : (category : Category) => void;
 }
 
-const CategoryList = ({categories,handleEdit,onDelete,isFiltered=false}:CategoryListProps) => {
+const CategoryList = ({categories,handleEdit,onDelete,isFiltered=false,onMoveContent}:CategoryListProps) => {
   const {user} = useAuth();
   const isAdmin = user?.role === 'admin';
 
@@ -75,8 +76,8 @@ const CategoryList = ({categories,handleEdit,onDelete,isFiltered=false}:Category
 
           {/* footer */}
 
-            <div className="fixed-bottom flex items-center justify-between border-t border-gray-100 pt-4">
-              <div className="flex items-center gap-2">
+            <div className="fixed-bottom flex items-center justify-end border-t border-gray-100 pt-4">
+              {/* <div className="flex items-center gap-2">
                  <span
                     className="size-3 rounded-full border border-black/10"
                     style={{ backgroundColor: category.color_hex }}
@@ -84,12 +85,22 @@ const CategoryList = ({categories,handleEdit,onDelete,isFiltered=false}:Category
                   <span className="text-xs text-gray-500">
                     {category.color_hex}
                   </span>
-              </div>
+              </div> */}
 
               
 
               {isAdmin && (
                 <div className="flex items-center gap-2">
+                  {category.usage_count > 0 && (
+                    <button
+                      type='button'
+                      onClick={()=> onMoveContent(category)}
+                      className="rounded-lg border border-gray-200 cursor-pointer px-3 py-1.5 text-sm font-medium bg-gray-700 transition hover:bg-gray-900 text-white"
+                    >
+                      Move
+                    </button>
+                  )}
+
                   <button type='button' onClick={()=> handleEdit(category)} className="rounded-lg cursor-pointer px-3 py-1.5 text-sm font-medium bg-blue-600 text-white hover:bg-blue-900 transition">
                     Edit
                   </button>

@@ -30,3 +30,14 @@ export interface CategoryFilter{
     is_active? : boolean;
     page? : number
 }
+
+export interface MoveContentPayload{
+    target_category : string;
+    deactivate_source : boolean;
+}
+
+export interface MoveContentResult{
+    moved : { blogs : number ; videos : number };
+    drafts_left : { blogs : number ; videos : number };
+    deactivated : boolean;
+}

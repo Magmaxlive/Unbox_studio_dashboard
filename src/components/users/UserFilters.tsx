@@ -1,5 +1,5 @@
 import { Search,X } from "lucide-react"
-import type { UserRole } from "../../../types/Users";
+import type { UserRole } from "../../types/Users";
 import { USER_ROLE_CONFIG, USER_ROLE_OPTIONS } from "./userRole";
 
 interface UserFilterProps{

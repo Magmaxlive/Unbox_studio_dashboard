@@ -1,12 +1,12 @@
-import React from 'react'
-import CreateButton from '../../../ui/CreateButton'
+
+import CreateButton from '../../ui/CreateButton'
 import UsersTable from '../UsersTable'
-import type { User,UserFilter, UserRole } from '../../../../types/Users'
-import Pagination from '../../../ui/Pagination'
+import type { User,UserFilter,UserRole } from '../../../types/Users'
+import Pagination from '../../ui/Pagination'
 import { useEffect,useState } from 'react'
-import { useUsers } from '../../../../hooks/queries/users'
+import { useUsers } from '../../../hooks/queries/users'
 import { replace, useLocation, useSearchParams } from 'react-router-dom'
-import UseDebounce from '../../../../hooks/UseDebounce'
+import UseDebounce from '../../../hooks/UseDebounce'
 import UserFilters from '../UserFilters'
 
 const PAGE_SIZE = 12

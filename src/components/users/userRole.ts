@@ -1,4 +1,4 @@
-import type { UserRole } from "../../../types/Users";
+import type { UserRole } from "../../types/Users";
 
 interface UserRoleConfig{
     label : string;

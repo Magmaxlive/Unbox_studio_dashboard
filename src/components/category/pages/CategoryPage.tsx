@@ -10,6 +10,7 @@ import ConfirmDialog from '../../ui/ConfirmDialog';
 import Pagination from '../../ui/Pagination';
 import CreateButton from '../../ui/CreateButton';
 import type { CategoryFilter } from '../../../types/Category';
+import MoveContentDialog from '../MoveContentDialog';
 
 const STATUS_FILTERS  =[
     {value : 'all',label:'All'},
@@ -30,6 +31,7 @@ const CategoryPage = () => {
     const [categoryToDelete,setCategoryToDelete] = useState<string|null>(null)
     const [apiFieldErrors, setApiFieldErrors] = useState<Record<string, string>>({});
     const [selectedCategory,setSelectedCategory] = useState<Category|null>(null);
+    const [categoryToMove,setCategoryToMove] = useState<Category|null>(null);
 
     const filters : CategoryFilter = {page:currentPage}
     if (isAdmin && status !== 'all'){
@@ -173,7 +175,12 @@ const CategoryPage = () => {
 
             </div>
         )}
-        <CategoryList categories={categories} handleEdit={handleEdit} onDelete={handleDelete} isFiltered={status !=='all'} />
+        <CategoryList 
+        categories={categories} 
+        handleEdit={handleEdit} 
+        onDelete={handleDelete} 
+        isFiltered={status !=='all'}
+        onMoveContent={setCategoryToMove} />
 
         <CategoryForm 
             apiFieldErrors={apiFieldErrors} 
@@ -192,6 +199,11 @@ const CategoryPage = () => {
             isLoading={deleteMutation.isPending}
             onConfirm={handleConfirmDelete}
             onClose={()=>setCategoryToDelete(null)} 
+        />
+
+        <MoveContentDialog
+            category={categoryToMove}
+            onClose={()=>setCategoryToMove(null)}
         />
 
         <Pagination

@@ -1,4 +1,4 @@
-import type { Category,CategoryPayload,CategoryFilter } from "../types/Category";
+import type { Category,CategoryPayload,CategoryFilter,MoveContentPayload,MoveContentResult } from "../types/Category";
 import api from "./axios";
 import type { PaginatedResponse } from "../types/PaginatedResponse";
 
@@ -41,4 +41,10 @@ export async function updateCategory(id : string,data : Partial<CategoryPayload>
 // delete category
 export async function deleteCategory(id:string) : Promise<void>{
     await api.delete(`/category/${id}/`);
+}
+
+// move all non-draft content to another category (admin) : optionally deactivate this one
+export async function moveCategoryConent(id:string,data:MoveContentPayload) : Promise<MoveContentResult> {
+    const response = await api.post<MoveContentResult>(`/category/${id}/move-content/`,data);
+    return response.data;
 }

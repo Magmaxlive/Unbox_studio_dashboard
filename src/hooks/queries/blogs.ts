@@ -1,6 +1,9 @@
 import { useMutation,useQueryClient,useQuery,keepPreviousData } from "@tanstack/react-query";
-import { getBlogs,createBlogs,retrieveBlog,updateBlog,deleteBlog,getBlogActivity,transitionBlog } from "../../api/blogs";
+import { getBlogs,createBlogs,retrieveBlog,updateBlog,deleteBlog,getBlogActivity,transitionBlog,bulkBlogAction,bulkBlogCategory} from "../../api/blogs";
 import type { BlogPayload,BlogFilter, BlogTransition } from "../../types/Blogs";
+import type { BlogBulkMode } from "../../components/blog/blogBulkActions";
+import { categoryKeys } from "./categories";
+import { isAxiosError } from 'axios'
 
 
 export const blogKeys = {
@@ -28,6 +31,8 @@ export function useBlogs(filters:BlogFilter = {}) {
         // approve/reject appears without a refresh. Stops when none are pending.
         refetchInterval : (query) =>
             query.state.data?.results.some((blog) => blog.status === 'pending') ? 30_000 : false,
+        retry : (failureCount, error) =>
+            !(isAxiosError(error) && error.response?.status === 404) && failureCount < 2,
     })
 }
 
@@ -133,6 +138,36 @@ export function useBlogTransition(){
             queryClient.invalidateQueries({
                 queryKey : blogKeys.detail(variables.id)
             })
+        }
+    })
+}
+
+// bulk archive/restore/delete/category
+
+export function useBlogBulkAction(){
+    const queryClient = useQueryClient();
+    
+    return useMutation({
+        mutationFn : ({mode,ids,category}:{mode:BlogBulkMode,ids:string[],category?:string}) => 
+            mode === 'category' 
+            ? bulkBlogCategory(ids,category ?? '')
+            : bulkBlogAction(mode,ids),
+        onSettled : (result,_error,{mode}) => {
+            // statuses / categories changed: refresh lists and any open details
+            queryClient.invalidateQueries({queryKey : blogKeys.lists()});
+            queryClient.invalidateQueries({queryKey:blogKeys.details()});
+
+            if (mode === 'delete'){
+                result?.succeeded.forEach((id)=>{
+                    queryClient.removeQueries({queryKey : blogKeys.detail(id)});
+                });
+            }
+
+            // usage count on category cards
+
+            if (mode === 'category' || mode === 'delete'){
+                queryClient.invalidateQueries({queryKey : categoryKeys.lists()})
+            }
         }
     })
 }
