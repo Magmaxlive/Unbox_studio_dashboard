@@ -9,7 +9,6 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { handleMutationError } from '../../../utlis/handleMutationError'
 import { startOfLocalDayISO, startOfNextLocalDayISO } from '../../../utlis/dateRange'
 import { isAxiosError } from 'axios'
-import BlogFilters from '../BlogFilters'
 import BlogTable from '../BlogTable'
 import BlogViewModal from '../BlogViewModal'
 import BulkActionBar from '../../bulk/BulkActionBar'
@@ -23,6 +22,7 @@ import {
     pluralise,
     type BulkMode,
 } from '../../bulk/bulkActions'
+import ContentFilters from '../../filters/ContentFilter'
 
 const PAGE_SIZE = 12;
 const BULK_PAGE_SIZE = 20;
@@ -439,7 +439,8 @@ const BlogPage = () => {
             />
         )}
 
-        <BlogFilters
+        <ContentFilters
+            noun='blogs'
             isAdmin={isAdmin}
             showStatusFilter={!bulkConfig}
             search={searchInput}

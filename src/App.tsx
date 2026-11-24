@@ -13,6 +13,7 @@ import BlogPage from './components/blog/pages/BlogPage'
 import BlogFormPage from './components/blog/pages/BlogFormPage'
 import RouteErrorPage from './components/pages/RouteErrorPage'
 import UserPage from './components/users/pages/UserPage'
+import VideoPage from './components/video/pages/VideoPage'
 
 
 const router = createBrowserRouter(
@@ -32,10 +33,18 @@ const router = createBrowserRouter(
         <Route element={<DashboardLayout/>}>
           <Route errorElement={<RouteErrorPage/>}>
               <Route path='/dashboard'  element={<DashboardPage/>} />
+
+              {/* categories */}
               <Route path='/categories'  element={<CategoryPage/>} />
+
+              {/* blogs */}
               <Route path='/blogs'  element={<BlogPage/>} />
               <Route path='/blogs/new'  element={<BlogFormPage/>} />
               <Route path='/blogs/:id/edit'  element={<BlogFormPage/>} />
+
+              {/* videos */}
+              <Route path='/videos' element={<VideoPage/>} />
+
             </Route>
         </Route>
       </Route>
