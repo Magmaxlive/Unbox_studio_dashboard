@@ -1,6 +1,6 @@
 
 import { Link,useLocation } from 'react-router-dom'
-import {LayoutDashboard,Video,FileText,Tags,Users,Settings,X} from 'lucide-react'
+import {LayoutDashboard,Video,FileText,Tags,Users,Settings,X,ClipboardCheck} from 'lucide-react'
 import logo from '../../assets/images/logo.png'
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -18,6 +18,7 @@ const Sidebar = ({isOpen,onClose}:SidebarProps) => {
 
     const menuItems = [
     { label: "Overview", path: "/dashboard", icon: LayoutDashboard },
+    ...(isAdmin ?[{label :"Review", path: "/admin/reviews",icon: ClipboardCheck},]:[]),
     { label: isAdmin ? "Videos" : "My videos", path: "/videos", icon: Video },
     { label: isAdmin ? "Blogs" : "My Blogs", path: "/blogs", icon: FileText },
     { label: "Categories", path: "/categories", icon: Tags },
