@@ -10,7 +10,7 @@ import {
     type UploadedPart,
 } from '../api/media'
 import { videoKeys } from './queries/videos'
-import { checkVideoFile } from '../utlis/videoFile'
+import { checkVideoFile  } from '../utlis/videoFile'
 import { getApiErrorMessage } from '../utlis/getApiErrorMessage'
 
 const PARALLEL_PARTS = 3;
