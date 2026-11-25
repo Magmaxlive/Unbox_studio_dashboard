@@ -69,6 +69,7 @@ export interface VideoFilter{
     search ? : string;
     created_after ? : string;
     created_before ? : string;
+    ordering ? : string;
 }
 
 export interface Paginated<T> {
