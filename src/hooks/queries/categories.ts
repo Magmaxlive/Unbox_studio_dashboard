@@ -103,7 +103,7 @@ export function useMoveCategoryContent(){
             // blogs show a different category now. Uses the base key instead of
             // importing blogKeys, which would make the two hook files import each other.
             queryClient.invalidateQueries({ queryKey : ['blogs'] });
-            // later : ['videos'] once the video dashboard exists
+            queryClient.invalidateQueries({ queryKey : ['videos'] });
         },
     });
 }

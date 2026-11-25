@@ -3,6 +3,24 @@ import api from "./axios";
 import type { PaginatedResponse } from "../types/PaginatedResponse";
 import type { ImageUploadResponse,MediaAsset,MediaFilter,PresignedUpload } from "../types/Media";
 
+export interface VideoUploadStartPayload {
+    video : string;
+    file_name : string;
+    file_size : number;
+    mime_type : string;
+}
+
+export interface VideoUploadStartResponse {
+    asset : MediaAsset;
+    part_size : number;
+    part_count : number;
+}
+
+export interface UploadedPart {
+    part_number : number;
+    etag : string;
+}
+
 // ask the backend  for an upload
 export async function requestImageUpload(file:File) : Promise<ImageUploadResponse> {
     const response = await api.post<ImageUploadResponse>('/media/uploads/',{
@@ -55,4 +73,28 @@ export async function retriveMediaAsset(id:string) : Promise<MediaAsset> {
 export async function updateMediaAsset(id:string,data:{alt_text:string}) : Promise<MediaAsset> {
     const response = await api.patch<MediaAsset>(`/media/${id}/`,data);
     return response.data;
+}
+
+// video
+export async function startVideoUpload(data:VideoUploadStartPayload) : Promise<VideoUploadStartResponse> {
+    const response = await api.post<VideoUploadStartResponse>('/media/video-uploads/',data);
+    return response.data;
+}
+
+export async function signVideoParts(assetId:string, partNumbers:number[]) : Promise<{part_number : number; url : string}[]> {
+    const response = await api.post<{ urls : { part_number : number; url : string }[] }>(
+        `/media/${assetId}/video/parts/`,
+        { part_numbers : partNumbers }
+    );
+
+    return response.data.urls;
+}
+
+export async function completeVideoUpload(assetId:string,parts:UploadedPart[]) : Promise<MediaAsset> {
+    const response = await api.post<MediaAsset>(`/media/${assetId}/video/complete/`, {parts});
+    return response.data;
+}
+
+export async function abortVideoUpload(assetId:string) : Promise<void> {
+    await api.post(`/media/${assetId}/video/abort/`);
 }

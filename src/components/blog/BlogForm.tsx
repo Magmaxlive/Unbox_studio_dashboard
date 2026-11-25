@@ -15,7 +15,6 @@ import ConfirmDialog from "../ui/ConfirmDialog"
 import { getAvailableTransitions } from "./blogPermissions"
 import BlogStatusBadge from "./BlogStatusBadge"
 import RichTextEditor from "../ui/RichTextEditor"
-import ImageUploader from "../ui/ImageUploader"
 import CoverImageField from "./CoverImageField"
 import { useUpdateMediaAsset } from "../../hooks/queries/media"
 import { BLOG_STATUS_CONFIG } from "./blogStatus"
@@ -301,7 +300,7 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
         )}
 
         {isEditingOthersContent && (
-            <div className="flex items-start gap-2 roundec-xl border border-gray-200 bg-white text-sm p-3 text-gray-600">
+            <div className="flex items-start gap-2 rounded-xl border border-gray-200 bg-white text-sm p-3 text-gray-600">
                 <Info size={16} className="mt-0.5 shrink-0 text-gray-400" />
                 <p>
                     You're editing <span className="font-medium capitalize">{initialBlog?.contributor_name}</span>'s blog.

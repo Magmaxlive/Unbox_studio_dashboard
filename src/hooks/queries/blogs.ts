@@ -1,7 +1,7 @@
 import { useMutation,useQueryClient,useQuery,keepPreviousData } from "@tanstack/react-query";
 import { getBlogs,createBlogs,retrieveBlog,updateBlog,deleteBlog,getBlogActivity,transitionBlog,bulkBlogAction,bulkBlogCategory} from "../../api/blogs";
 import type { BlogPayload,BlogFilter, BlogTransition } from "../../types/Blogs";
-import type { BlogBulkMode } from "../../components/blog/blogBulkActions";
+import type { BulkMode } from "../../components/bulk/bulkActions";
 import { categoryKeys } from "./categories";
 import { isAxiosError } from 'axios'
 
@@ -148,7 +148,7 @@ export function useBlogBulkAction(){
     const queryClient = useQueryClient();
     
     return useMutation({
-        mutationFn : ({mode,ids,category}:{mode:BlogBulkMode,ids:string[],category?:string}) => 
+        mutationFn : ({mode,ids,category}:{mode:BulkMode,ids:string[],category?:string}) => 
             mode === 'category' 
             ? bulkBlogCategory(ids,category ?? '')
             : bulkBlogAction(mode,ids),

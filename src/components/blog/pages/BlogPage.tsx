@@ -9,22 +9,23 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { handleMutationError } from '../../../utlis/handleMutationError'
 import { startOfLocalDayISO, startOfNextLocalDayISO } from '../../../utlis/dateRange'
 import { isAxiosError } from 'axios'
-import BlogFilters from '../BlogFilters'
 import BlogTable from '../BlogTable'
 import BlogViewModal from '../BlogViewModal'
-import BulkActionBar from '../BulkActionBar'
+import BulkActionBar from '../../bulk/BulkActionBar'
 import Pagination from '../../ui/Pagination'
 import ConfirmDialog from '../../ui/ConfirmDialog'
 import CreateButton from '../../ui/CreateButton'
 import {
     getAvailableBulkModes,
     getBulkModeConfig,
-    pluraliseBlogs,
-    type BlogBulkMode,
-} from '../blogBulkActions'
+    BLOG_NOUN,
+    pluralise,
+    type BulkMode,
+} from '../../bulk/bulkActions'
+import ContentFilters from '../../filters/ContentFilter'
 
 const PAGE_SIZE = 12;
-const BULK_PAGE_SIZE = 4;
+const BULK_PAGE_SIZE = 20;
 
 // URL values can be edited by hand or come from old bookmarks: validate them.
 const BLOG_STATUSES : BlogStatus[] = ['draft', 'pending', 'published', 'rejected', 'archived'];
@@ -36,7 +37,7 @@ interface UpdateParamsOptions {
     replace? : boolean;
 }
 
-const BULK_CONFIRM_DESCRIPTION : Record<BlogBulkMode, string> = {
+const BULK_CONFIRM_DESCRIPTION : Record<BulkMode, string> = {
     archive : 'They will be removed from the public website. You can restore them later.',
     restore : 'They will be visible on the public website again.',
     category : '',  // filled in with the destination name
@@ -71,9 +72,9 @@ const BlogPage = () => {
     const urlSearch = (searchParams.get('search') ?? '').trim();
 
     const availableBulkModes = getAvailableBulkModes(isAdmin);
-    const bulkParam = searchParams.get('bulk') as BlogBulkMode | null;
+    const bulkParam = searchParams.get('bulk') as BulkMode | null;
     const bulkMode = bulkParam && availableBulkModes.includes(bulkParam) ? bulkParam : null;
-    const bulkConfig = bulkMode ? getBulkModeConfig(bulkMode, isAdmin) : null;
+    const bulkConfig = bulkMode ? getBulkModeConfig(bulkMode, isAdmin,BLOG_NOUN) : null;
 
     const updateParams = (
         changes : Record<string, string | null>,
@@ -216,7 +217,7 @@ const BlogPage = () => {
     }
 
     // ── bulk mode ──
-    const handleBulkModeChange = (mode:BlogBulkMode | '') => {
+    const handleBulkModeChange = (mode:BulkMode | '') => {
         setBulkCategory('');
         // entering a mode: the mode decides statuses, so drop the status filter
         updateParams({ bulk : mode || null, status : null });
@@ -243,14 +244,14 @@ const BlogPage = () => {
         if (!bulkConfig) return;
 
         if (result.succeeded.length) {
-            toast.success(`${bulkConfig.pastTense} ${pluraliseBlogs(result.succeeded.length)}`);
+            toast.success(`${bulkConfig.pastTense} ${pluralise(result.succeeded.length,BLOG_NOUN)}`);
         }
 
         if (result.skipped.length) {
             const shown = result.skipped.slice(0, 3)
                 .map((item)=>`${item.title || 'Unknown blog'}: ${item.reason}`);
             const more = result.skipped.length - shown.length;
-            toast.warning(`${pluraliseBlogs(result.skipped.length)} skipped`, {
+            toast.warning(`${pluralise(result.skipped.length,BLOG_NOUN)} skipped`, {
                 description : [...shown, ...(more > 0 ? [`…and ${more} more`] : [])].join('\n'),
             });
         }
@@ -408,14 +409,14 @@ const BlogPage = () => {
                 {!bulkMode && (
                     <select
                         value=""
-                        onChange={(e)=>handleBulkModeChange(e.target.value as BlogBulkMode)}
+                        onChange={(e)=>handleBulkModeChange(e.target.value as BulkMode)}
                         aria-label="Bulk actions"
                         className="cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm font-medium text-gray-700 outline-none focus:border-gray-900"
                     >
                         <option value="">Bulk actions…</option>
                         {availableBulkModes.map((mode)=>(
                             <option key={mode} value={mode}>
-                                {getBulkModeConfig(mode, isAdmin).label}
+                                {getBulkModeConfig(mode, isAdmin,BLOG_NOUN).label}
                             </option>
                         ))}
                     </select>
@@ -434,10 +435,12 @@ const BlogPage = () => {
                 onApply={()=>setIsBulkConfirmOpen(true)}
                 onExit={()=>handleBulkModeChange('')}
                 isBusy={bulkMutation.isPending}
+                noun={BLOG_NOUN}
             />
         )}
 
-        <BlogFilters
+        <ContentFilters
+            noun='blogs'
             isAdmin={isAdmin}
             showStatusFilter={!bulkConfig}
             search={searchInput}
@@ -487,9 +490,9 @@ const BlogPage = () => {
         {bulkConfig && (
             <ConfirmDialog
                 isOpen={isBulkConfirmOpen}
-                title={`${bulkConfig.verb} ${pluraliseBlogs(selectedIds.size)}?`}
+                title={`${bulkConfig.verb} ${pluralise(selectedIds.size,BLOG_NOUN)}?`}
                 description={bulkConfirmDescription}
-                confirmText={`${bulkConfig.verb} ${pluraliseBlogs(selectedIds.size)}`}
+                confirmText={`${bulkConfig.verb} ${pluralise(selectedIds.size,BLOG_NOUN)}`}
                 loadingText="Working..."
                 variant={bulkConfig.danger ? 'danger' : 'default'}
                 confirmPhrase={bulkMode === 'delete' ? String(selectedIds.size) : undefined}

@@ -76,12 +76,6 @@ const BlogEditLoader = ({id}:{id:string})=>{
         return null;
     }
 
-    console.log('edit check', {
-        status : loaded.status,
-        contributor : loaded.contributor,
-        userId : user?.id,
-        role : user?.role,
-    });
 
     const blockedReason = getEditBlockedReason(loaded,user);
     if (blockedReason){

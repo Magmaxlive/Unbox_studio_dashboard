@@ -9,6 +9,8 @@ interface CoverImageFieldProps {
     onChange : (value:CoverImageValue | null) => void;
     error? : string;
     disabled? : boolean;
+    label?:string;
+    altInputId?:string;
 }
 
 const labelClass = "mb-1.5 block text-sm font-medium text-gray-700"
@@ -20,7 +22,7 @@ const toCoverValue = (asset:MediaAsset) : CoverImageValue => ({
     alt_text : asset.alt_text,
 });
 
-const CoverImageField = ({ value, onChange, error, disabled = false }:CoverImageFieldProps) => {
+const CoverImageField = ({ value, onChange, error, disabled = false , label ='Cover image' ,altInputId = 'cover-alt' }:CoverImageFieldProps) => {
     const [isPickerOpen,setIsPickerOpen] = useState(false);
     // replacing: show the uploader/picker while keeping the current cover until a new one is chosen
     const [isReplacing,setIsReplacing] = useState(false);
@@ -35,7 +37,7 @@ const CoverImageField = ({ value, onChange, error, disabled = false }:CoverImage
 
   return (
     <div>
-        <span className={labelClass}>Cover image</span>
+        <span className={labelClass}>{label}</span>
 
         {value && !isReplacing ? (
             <div className="space-y-3">
@@ -69,9 +71,9 @@ const CoverImageField = ({ value, onChange, error, disabled = false }:CoverImage
                 </div>
 
                 <div>
-                    <label htmlFor="cover-alt" className={labelClass}>Alt text</label>
+                    <label htmlFor={altInputId} className={labelClass}>Alt text</label>
                     <input
-                        id="cover-alt"
+                        id={altInputId}
                         type="text"
                         value={value.alt_text}
                         onChange={(e)=>onChange({ ...value, alt_text : e.target.value })}

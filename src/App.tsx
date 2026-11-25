@@ -1,7 +1,7 @@
 
 import './App.css'
 import LoginPage from './components/auth/pages/LoginPage'
-import { Route,RouterProvider,createBrowserRouter,createRoutesFromElements } from 'react-router-dom'
+import { Route,RouterProvider,createBrowserRouter,createRoutesFromElements,Navigate } from 'react-router-dom'
 import ProtectedRoutes from './components/auth/ProtectedRoutes'
 import DashboardPage from './components/pages/DashboardPage'
 import Unauthorized from './components/pages/Unauthorized'
@@ -13,6 +13,8 @@ import BlogPage from './components/blog/pages/BlogPage'
 import BlogFormPage from './components/blog/pages/BlogFormPage'
 import RouteErrorPage from './components/pages/RouteErrorPage'
 import UserPage from './components/users/pages/UserPage'
+import VideoPage from './components/video/pages/VideoPage'
+import VideoFormPage from './components/video/pages/VideoFormPage'
 
 
 const router = createBrowserRouter(
@@ -31,11 +33,22 @@ const router = createBrowserRouter(
       <Route element={<ProtectedRoutes/>}>
         <Route element={<DashboardLayout/>}>
           <Route errorElement={<RouteErrorPage/>}>
+              <Route path='/' element={<Navigate to='/dashboard' replace />}/>
               <Route path='/dashboard'  element={<DashboardPage/>} />
+
+              {/* categories */}
               <Route path='/categories'  element={<CategoryPage/>} />
+
+              {/* blogs */}
               <Route path='/blogs'  element={<BlogPage/>} />
               <Route path='/blogs/new'  element={<BlogFormPage/>} />
               <Route path='/blogs/:id/edit'  element={<BlogFormPage/>} />
+
+              {/* videos */}
+              <Route path='/videos' element={<VideoPage/>} />
+              <Route path='/videos/new' element={<VideoFormPage/>} />
+              <Route path='/videos/:id/edit' element={<VideoFormPage/>} />
+
             </Route>
         </Route>
       </Route>
