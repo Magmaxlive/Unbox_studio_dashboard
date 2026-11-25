@@ -54,7 +54,7 @@ export interface VideoPayload {
     title : string;
     category : string | null ;
     description : string;
-    thumbnail : string;
+    thumbnail : string | null;
     source_type ? : VideoSourceType;  //create only
     source_url ? : string;            // embeds only
 }
