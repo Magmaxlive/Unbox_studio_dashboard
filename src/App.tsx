@@ -14,6 +14,7 @@ import BlogFormPage from './components/blog/pages/BlogFormPage'
 import RouteErrorPage from './components/pages/RouteErrorPage'
 import UserPage from './components/users/pages/UserPage'
 import VideoPage from './components/video/pages/VideoPage'
+import VideoFormPage from './components/video/pages/VideoFormPage'
 
 
 const router = createBrowserRouter(
@@ -45,6 +46,8 @@ const router = createBrowserRouter(
 
               {/* videos */}
               <Route path='/videos' element={<VideoPage/>} />
+              <Route path='/videos/new' element={<VideoFormPage/>} />
+              <Route path='/videos/:id/edit' element={<VideoFormPage/>} />
 
             </Route>
         </Route>
