@@ -131,11 +131,11 @@ const VideoTable = ({videos, user, isAdmin, isFetching=false, selection=null, on
                             <td className={tdClass}>
                                 <div className="flex flex-col items-start gap-1">
                                     <BlogStatusBadge status={video.status} />
-                                    {(fileStatus === 'processing' || fileStatus === 'uploading') && (
+                                    {fileStatus === 'processing' && (
                                         <span className="text-xs font-medium text-amber-600">Processing…</span>
                                     )}
-                                    {fileStatus === 'failed' && (
-                                        <span className="text-xs font-medium text-red-600 ml-2">Upload failed</span>
+                                    {(fileStatus === 'uploading' || fileStatus === 'pending') && (
+                                        <span className="text-xs font-medium text-amber-600">Upload not finished</span>
                                     )}
                                 </div>
                             </td>

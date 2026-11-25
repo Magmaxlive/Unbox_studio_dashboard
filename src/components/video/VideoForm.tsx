@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useRef, useState,useCallback,useEffect } from "react"
 import { useBlocker, useLocation, useNavigate, type NavigateOptions } from "react-router-dom"
 import { useForm, useSelector } from "@tanstack/react-form"
 import { ArrowLeft, Info, Link2, Upload } from "lucide-react"
@@ -18,6 +18,8 @@ import CoverImageField from "../blog/CoverImageField"
 import { BLOG_STATUS_CONFIG } from "../blog/blogStatus"
 import VideoPlayer from "./VideoPlayer"
 import { getAvailableTransitions } from "./videoPermissions"
+import VideoUploader from "./videoUploader"
+import { checkVideoFile } from "../../utlis/videoFile"
 
 type SaveIntent = 'save' | 'submit' | 'publish'
 
@@ -108,6 +110,18 @@ const VideoForm = ({initialVideo, liveVideo}:VideoFormProps) => {
         allowLeaveRef.current = true;
         navigate(path, options);
     }
+
+     // a file picked on /videos/new, uploaded once the draft exists
+     const pendingFileRef = useRef<File | null>(null);
+     const [pendingFileName,setPendingFileName] = useState('');
+
+    // a file handed over from /videos/new: read once, then cleared from history
+    const handedOverFile = useRef<File | null>(
+        (location.state as {pendingUpload? : File} | null)?.pendingUpload ?? null
+    ).current;
+
+    const [isUploading,setIsUploading] = useState(false);
+    const handleUploadBusyChange = useCallback((busy:boolean)=>setIsUploading(busy),[])
 
     // the author's next step: admins publish, contributors submit
     const preferredTransition : VideoTransition = isAdmin ? 'publish' : 'submit';
@@ -221,8 +235,13 @@ const VideoForm = ({initialVideo, liveVideo}:VideoFormProps) => {
 
             if (intent === 'save') {
                 if (!initialVideo) {
-                    toast.success(saved.source_type === 'upload' ? 'Draft saved. Now upload the video file.' : 'Draft saved');
-                    leaveTo(`/videos/${saved.id}/edit`, { replace : true, state : location.state });
+                    const file = pendingFileRef.current;
+                    pendingFileRef.current = null;
+                    toast.success(file ? 'Draft saved. Uploading the video…' : 'Draft saved');
+                    leaveTo(`/videos/${saved.id}/edit`, {
+                        replace : true,
+                        state : { ...((location.state as object) ?? {}), pendingUpload : file ?? undefined },
+                    });
                     return;
                 }
                 syncWithSaved();
@@ -248,9 +267,31 @@ const VideoForm = ({initialVideo, liveVideo}:VideoFormProps) => {
         }
     });
 
+        useEffect(()=>{
+            if (handedOverFile) {
+                const { pendingUpload:_, ...rest } = (location.state ?? {}) as Record<string, unknown>;
+                navigate(location.pathname, { replace : true, state : rest });
+            }
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        },[])
+
     const handleSave = (intent:SaveIntent) => {
         intentRef.current = intent;
         form.handleSubmit();
+    }
+
+        // choosing a file on a new video saves the draft, then the upload starts
+    const handlePickNewFile = async (file:File | undefined) => {
+        if (!file) return;
+        const check = await checkVideoFile(file);
+        if (!check.ok) {
+            setFieldErrors((current)=>({ ...current, media : check.error }));
+            return;
+        }
+        setFieldErrors(({media:_, ...rest})=>rest);
+        pendingFileRef.current = file;
+        setPendingFileName(file.name);
+        handleSave('save');   // a title is needed, as for any save
     }
 
     // unsaved changes
@@ -258,10 +299,10 @@ const VideoForm = ({initialVideo, liveVideo}:VideoFormProps) => {
     const isSubmitting = useSelector(form.store, (state)=>state.isSubmitting);
     const hasUnsavedChanges = JSON.stringify(currentValues) !== JSON.stringify(baseline);
 
-    useUnSavedChangesWarning(hasUnsavedChanges && !isSubmitting);
+    useUnSavedChangesWarning((hasUnsavedChanges && !isSubmitting) || isUploading);
 
     const blocker = useBlocker(({ currentLocation, nextLocation }) =>
-        hasUnsavedChanges &&
+        (hasUnsavedChanges || isUploading) &&
         !allowLeaveRef.current &&
         currentLocation.pathname !== nextLocation.pathname &&
         nextLocation.pathname !== '/login'
@@ -271,6 +312,11 @@ const VideoForm = ({initialVideo, liveVideo}:VideoFormProps) => {
 
     const sourceType = currentValues.source_type;
     const showRejectionReason = currentVideo?.status === 'rejected' && Boolean(currentVideo?.rejection_reason);
+
+        // a new upload video can't be submitted yet: the file uploads after the draft exists
+    const isNewUpload = !isEditing && sourceType === 'upload';
+    const showNextAction = Boolean(nextTransition) && !isNewUpload;
+    const saveButtonLabel = isNewUpload && pendingFileName ? 'Save draft and upload' : saveLabel;
 
     // the saved embed preview only matches the field while the link is unchanged
     const linkUnchanged = currentValues.source_url.trim() === (currentVideo?.source_url ?? '');
@@ -409,18 +455,36 @@ const VideoForm = ({initialVideo, liveVideo}:VideoFormProps) => {
                             )}
                         </form.Field>
                     ) : (
-                        <div className="space-y-3">
+                                                <div className="space-y-3">
                             <span className={labelClass}>Video file</span>
 
-                            {!currentVideo ? (
-                                <div className="rounded-xl border border-dashed border-gray-300 px-6 py-10 text-center text-sm text-gray-500">
-                                    Save the draft first, then upload the video file here.
-                                </div>
+                            {currentVideo ? (
+                                <VideoUploader
+                                    video={currentVideo}
+                                    disabled={isSubmitting}
+                                    onBusyChange={handleUploadBusyChange}
+                                    autoStartFile={handedOverFile}
+                                />
                             ) : (
-                                <>
-                                    {/* V7: the uploader goes here (pick, upload, progress, cancel) */}
-                                    <VideoPlayer video={currentVideo} />
-                                </>
+                                <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 px-6 py-10 text-center transition hover:border-gray-400">
+                                    <Upload size={28} className="text-gray-400" />
+                                    <span className="text-sm text-gray-600">
+                                        {pendingFileName
+                                            ? <>Ready to upload <span className="font-medium">{pendingFileName}</span>. Add a title, then save the draft.</>
+                                            : 'Choose a video. The draft is saved first, then the upload starts.'}
+                                    </span>
+                                    <span className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white">
+                                        Choose video
+                                    </span>
+                                    <span className="text-xs text-gray-400">MP4 or MOV · up to 60 seconds · max 500 MB</span>
+                                    <input
+                                        type="file"
+                                        accept="video/mp4,video/quicktime,.mp4,.mov,.m4v"
+                                        className="hidden"
+                                        disabled={isSubmitting}
+                                        onChange={(e)=>{ handlePickNewFile(e.target.files?.[0]); e.target.value = ''; }}
+                                    />
+                                </label>
                             )}
 
                             {fieldErrors.media && <p className={errorClass}>{fieldErrors.media}</p>}
@@ -527,8 +591,9 @@ const VideoForm = ({initialVideo, liveVideo}:VideoFormProps) => {
                 </form.Field>
 
                 {/* actions */}
+                                {/* actions */}
                 <div className="flex flex-col gap-2 border-t border-gray-100 pt-4">
-                    {nextTransition && (
+                    {showNextAction && nextTransition && (
                         <button
                             type="button"
                             onClick={()=>handleSave(nextTransition)}
@@ -547,7 +612,7 @@ const VideoForm = ({initialVideo, liveVideo}:VideoFormProps) => {
                         disabled={isSubmitting}
                         className="cursor-pointer rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        {isSubmitting && !nextTransition ? 'Saving...' : saveLabel}
+                        {isSubmitting && !showNextAction ? 'Saving...' : saveButtonLabel}
                     </button>
 
                     <button
@@ -558,15 +623,24 @@ const VideoForm = ({initialVideo, liveVideo}:VideoFormProps) => {
                     >
                         Cancel
                     </button>
+
+                    {isNewUpload && (
+                        <p className="flex items-start gap-2 pt-1 text-xs leading-5 text-gray-500">
+                            <Info size={14} className="mt-0.5 shrink-0 text-gray-400" />
+                            You can {isAdmin ? 'publish' : 'submit'} once the video has finished uploading and processing.
+                        </p>
+                    )}
                 </div>
             </div>
         </form>
 
         <ConfirmDialog
             isOpen={blocker.state === 'blocked'}
-            title="discard changes?"
-            description="You have unsaved changes. If you leave now, they will be lost."
-            confirmText="discard"
+            title={isUploading ? 'cancel upload?' : 'discard changes?'}
+            description={isUploading
+                ? 'An upload is in progress. Leaving now will cancel it.'
+                : 'You have unsaved changes. If you leave now, they will be lost.'}
+            confirmText={isUploading ? 'leave and cancel' : 'discard'}
             variant="danger"
             onConfirm={()=>blocker.proceed?.()}
             onClose={()=>blocker.reset?.()}

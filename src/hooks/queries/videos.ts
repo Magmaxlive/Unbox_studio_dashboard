@@ -22,8 +22,8 @@ export const videoKeys = {
     activity : (id:string) => [...videoKeys.detail(id), 'activity'] as const,
 };
 
-const isProcessing = (video:Video) => 
-    video.source_type === 'upload' && (video.media?.status === 'processing' || video.media?.status === 'uploading' );
+const isProcessing = (video:Video) =>
+    video.source_type === 'upload' && video.media?.status === 'processing';
 
 // refresh on its own while something is changing in the background
 function pollInterval(videos:Video[] | undefined) : number | false {

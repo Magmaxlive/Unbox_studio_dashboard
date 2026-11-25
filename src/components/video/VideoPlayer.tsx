@@ -49,13 +49,24 @@ const VideoPlayer = ({ video }:{ video:Video }) => {
             )
         }
 
+        if (media.status === 'uploading' || media.status === 'pending') {
+            return (
+                <Placeholder
+                    tone="amber"
+                    icon={<AlertTriangle size={28} />}
+                    title="Upload not finished"
+                    text="The upload stopped before it completed. Please upload the file again."
+                />
+            )
+        }
+
         if (media.status !== 'ready' || !media.mp4_url) {
             return (
                 <Placeholder
                     tone="amber"
                     icon={<Loader2 size={28} className="animate-spin" />}
                     title="Processing the video…"
-                    text="This usually takes under a minute. This view updates on its own."
+                    text="This usually takes under a minute. You can leave this page: processing continues, and the video becomes ready on its own."
                 />
             )
         }
