@@ -129,6 +129,8 @@ export function useBlogTransition(){
             queryClient.invalidateQueries({
                 queryKey : blogKeys.activity(updatedBlog.id)
             })
+
+            queryClient.invalidateQueries({ queryKey : ['review'] });
         },
 
         onError : (_error,variables) => {
@@ -139,6 +141,8 @@ export function useBlogTransition(){
             queryClient.invalidateQueries({
                 queryKey : blogKeys.detail(variables.id)
             })
+
+            queryClient.invalidateQueries({ queryKey : ['review'] });
         }
     })
 }

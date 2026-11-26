@@ -13,6 +13,8 @@ import VideoViewModal from '../../video/VideoViewModal'
 import Pagination from '../../ui/Pagination'
 import type { Blog } from '../../../types/Blogs'
 import type { Video } from '../../../types/Videos'
+import { isAxiosError } from 'axios'
+
 
 const OVERDUE_DAYS = 3;
 const TYPES : ReviewType[] = ['all', 'blog', 'video'];
@@ -41,7 +43,7 @@ const ReviewPage = () => {
     const type : ReviewType = typeParam && TYPES.includes(typeParam) ? typeParam : 'all';
 
     const pageParam = Number(searchParams.get('page'));
-    const page = type !== 'all' && Number.isInteger(pageParam) && pageParam > 1 ? pageParam : 1;
+    const page = Number.isInteger(pageParam) && pageParam > 1 ? pageParam : 1;
 
     const categoryParam = searchParams.get('category') ?? '';
     const categorySlug = SLUG_PATTERN.test(categoryParam) ? categoryParam : '';
@@ -75,6 +77,14 @@ const ReviewPage = () => {
     },[urlSearch])
 
     const queue = useReviewQueue({ type, search : urlSearch, categorySlug, page });
+    const pageGone = page > 1 && queue.isError && isAxiosError(queue.error) && queue.error?.response?.status === 404;
+
+    useEffect(()=>{
+        if (pageGone) {
+            updateParams({ page : page > 2 ? String(page - 1) : null }, { resetPage : false, replace : true });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[pageGone, page])
     const hasFilters = Boolean(urlSearch || categorySlug);
 
     // ── modals ──
@@ -223,7 +233,7 @@ const ReviewPage = () => {
                         type="button"
                         role="tab"
                         aria-selected={selected}
-                        onClick={()=>updateParams({ type : tab === 'all' ? null : tab })}
+                        onClick={()=>updateParams({ type : tab === 'all' ? null : tab , page : null})}
                         className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition ${
                             selected ? 'bg-gray-900 text-white' : 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50'
                         }`}
@@ -276,7 +286,7 @@ const ReviewPage = () => {
 
         {renderContent()}
 
-        {type !== 'all' && !queue.isError && (
+        { !queue.isError && (
             <Pagination
                 currentPage={page}
                 totalPages={queue.totalPages}
@@ -285,15 +295,7 @@ const ReviewPage = () => {
             />
         )}
 
-        {queue.hasMore && (
-            <p className="text-xs text-gray-500">
-                Showing the oldest 50 blogs and 50 videos.{' '}
-                <button type="button" onClick={()=>updateParams({ type : 'blog' })} className="cursor-pointer font-medium text-gray-700 underline">Blogs</button>
-                {' '}or{' '}
-                <button type="button" onClick={()=>updateParams({ type : 'video' })} className="cursor-pointer font-medium text-gray-700 underline">Videos</button>
-                {' '}lets you page through everything.
-            </p>
-        )}
+        
 
         {blogToView && (
             <BlogViewModal
