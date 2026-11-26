@@ -12,6 +12,7 @@ import {
 import type { Video,VideoFilter,VideoPayload,VideoTransition } from "../../types/Videos";
 import type { BulkMode } from "../../components/bulk/bulkActions";
 import { categoryKeys } from "./categories";
+import { isAxiosError } from "axios";
 
 export const videoKeys = {
     all : ['videos'] as const,
@@ -33,11 +34,14 @@ function pollInterval(videos:Video[] | undefined) : number | false {
     return false;
 }
 
-export function useVideos(filters:VideoFilter){
+export function useVideos(filters:VideoFilter,{enabled = true} : {enabled ? : boolean}= {}){
     return useQuery({
         queryKey : videoKeys.list(filters),
         queryFn : ()=> getVideos(filters),
+        enabled,
         placeholderData : keepPreviousData,
+        retry : (failureCount, error) =>
+            !(isAxiosError(error) && error.response?.status === 404) && failureCount < 2,
         refetchInterval : (query) => pollInterval(query.state.data?.results),
     });
 }
@@ -101,6 +105,7 @@ export function useVideoTransition(){
             // refused actions refresh stale screens too
             queryClient.invalidateQueries({ queryKey : videoKeys.lists() });
             queryClient.invalidateQueries({ queryKey : videoKeys.detail(id) });
+            queryClient.invalidateQueries({ queryKey : ['review'] });
         },
     });
 }

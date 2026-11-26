@@ -11,7 +11,10 @@ import { getEditBlockedReason } from "../videoPermissions"
 const PageMessage = ({title, children}:{title:string; children?:ReactNode}) => {
     const location = useLocation();
     const stateReturnTo = (location.state as { returnTo? : string } | null)?.returnTo;
-    const returnTo = stateReturnTo?.startsWith('/videos') ? stateReturnTo : '/videos';
+    const returnTo = stateReturnTo && (stateReturnTo.startsWith('/videos') || stateReturnTo.startsWith('/admin/review'))
+        ? stateReturnTo
+        : '/videos';
+    const backLabel = returnTo.startsWith('/admin/review') ? 'Back to review' : 'Back to videos';
 
     return (
         <div className="flex flex-col gap-6">
@@ -20,7 +23,7 @@ const PageMessage = ({title, children}:{title:string; children?:ReactNode}) => {
                 className="flex w-fit items-center gap-1.5 text-sm font-medium text-gray-500 transition hover:text-gray-900"
             >
                 <ArrowLeft size={16} />
-                Back to videos
+                {backLabel}
             </Link>
 
             <div className="rounded-xl border border-gray-200 bg-white px-6 py-10 text-center">

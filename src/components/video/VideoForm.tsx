@@ -71,7 +71,11 @@ const VideoForm = ({initialVideo, liveVideo}:VideoFormProps) => {
     const navigate = useNavigate();
     const location = useLocation();
     const stateReturnTo = (location.state as { returnTo? : string } | null)?.returnTo;
-    const returnTo = stateReturnTo?.startsWith('/videos') ? stateReturnTo : '/videos';
+    // only known pages: navigation state is easy to tamper with
+    const returnTo = stateReturnTo && (stateReturnTo.startsWith('/videos') || stateReturnTo.startsWith('/admin/review'))
+        ? stateReturnTo
+        : '/videos';
+    const backLabel = returnTo.startsWith('/admin/review') ? 'Back to review' : 'Back to videos';
 
     const {user} = useAuth();
     const isAdmin = user?.role === 'admin';
@@ -330,7 +334,7 @@ const VideoForm = ({initialVideo, liveVideo}:VideoFormProps) => {
             className="flex w-fit cursor-pointer items-center gap-1.5 text-sm font-medium text-gray-500 transition hover:text-gray-900"
         >
             <ArrowLeft size={16} />
-            Back to videos
+            {backLabel}
         </button>
 
         <div className="flex flex-wrap items-center gap-3">

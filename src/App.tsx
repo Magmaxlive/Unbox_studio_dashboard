@@ -15,6 +15,7 @@ import RouteErrorPage from './components/pages/RouteErrorPage'
 import UserPage from './components/users/pages/UserPage'
 import VideoPage from './components/video/pages/VideoPage'
 import VideoFormPage from './components/video/pages/VideoFormPage'
+import ReviewPage from './components/review/pages/ReviewPage'
 
 
 const router = createBrowserRouter(
@@ -58,6 +59,7 @@ const router = createBrowserRouter(
        <Route element={<DashboardLayout/>}>
         <Route errorElement={<RouteErrorPage/>}>
           <Route path='/admin/users'  element={<UserPage/>} />
+          <Route path='/admin/review'  element={<ReviewPage/>} />
         </Route>
         </Route>
       </Route>

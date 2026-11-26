@@ -1,6 +1,7 @@
 
 import { Link,useLocation } from 'react-router-dom'
-import {LayoutDashboard,Video,FileText,Tags,Users,Settings,X} from 'lucide-react'
+import {LayoutDashboard,Video,FileText,Tags,Users,Settings,X,ClipboardCheck} from 'lucide-react'
+import { useReviewCount } from '../../hooks/queries/reviews';
 import logo from '../../assets/images/logo.png'
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -15,9 +16,12 @@ const Sidebar = ({isOpen,onClose}:SidebarProps) => {
     const location = useLocation()
     const {user} = useAuth();
     const isAdmin = user?.role === 'admin'
+    // admin only
+    const reviewcount = useReviewCount({enabled : isAdmin})
 
     const menuItems = [
     { label: "Overview", path: "/dashboard", icon: LayoutDashboard },
+    ...(isAdmin ?[{label :"Review", path: "/admin/review",icon: ClipboardCheck , badge : reviewcount},]:[]),
     { label: isAdmin ? "Videos" : "My videos", path: "/videos", icon: Video },
     { label: isAdmin ? "Blogs" : "My Blogs", path: "/blogs", icon: FileText },
     { label: "Categories", path: "/categories", icon: Tags },
@@ -75,6 +79,14 @@ const Sidebar = ({isOpen,onClose}:SidebarProps) => {
                     <Link to={item.path} key={item.path} className={`flex tracking-wide items-center gap-4 text-soft rounded-md p-3 text font-medium transition hover:bg-violet hover:text-white ${location.pathname === item.path || location.pathname.startsWith(`${item.path}`) ? 'bg-violet' : ''}`}>
                         <Icon size={18}/>
                         {item.label}
+                        {'badge' in item && Boolean(item.badge) && (
+                            <span
+                                className="ml-auto min-w-6 rounded-full bg-amber-400 px-2 py-0.5 text-center text-xs font-bold text-ink"
+                                aria-label={`${item.badge} waiting for review`}
+                            >
+                                {item.badge}
+                            </span>
+                        )}
                     </Link>
                 )
             })}

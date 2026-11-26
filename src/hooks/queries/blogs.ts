@@ -22,10 +22,11 @@ export const blogKeys = {
 }
 
 // fetch all blogs
-export function useBlogs(filters:BlogFilter = {}) {
+export function useBlogs(filters:BlogFilter = {},{enabled = true}:{enabled? : boolean} = {}) {
     return useQuery({
         queryKey : blogKeys.list(filters),
         queryFn : () => getBlogs(filters),
+        enabled,
         placeholderData : keepPreviousData,
         // Poll while any visible blog is awaiting review, so an admin's
         // approve/reject appears without a refresh. Stops when none are pending.
@@ -128,6 +129,8 @@ export function useBlogTransition(){
             queryClient.invalidateQueries({
                 queryKey : blogKeys.activity(updatedBlog.id)
             })
+
+            queryClient.invalidateQueries({ queryKey : ['review'] });
         },
 
         onError : (_error,variables) => {
@@ -138,6 +141,8 @@ export function useBlogTransition(){
             queryClient.invalidateQueries({
                 queryKey : blogKeys.detail(variables.id)
             })
+
+            queryClient.invalidateQueries({ queryKey : ['review'] });
         }
     })
 }
