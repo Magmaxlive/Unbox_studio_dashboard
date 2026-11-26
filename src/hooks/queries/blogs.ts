@@ -22,7 +22,7 @@ export const blogKeys = {
 }
 
 // fetch all blogs
-export function useBlogs(filters:BlogFilter = {},{enabled = true}:{enabled? : boolean}) {
+export function useBlogs(filters:BlogFilter = {},{enabled = true}:{enabled? : boolean} = {}) {
     return useQuery({
         queryKey : blogKeys.list(filters),
         queryFn : () => getBlogs(filters),

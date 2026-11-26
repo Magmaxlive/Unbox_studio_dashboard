@@ -33,7 +33,7 @@ function pollInterval(videos:Video[] | undefined) : number | false {
     return false;
 }
 
-export function useVideos(filters:VideoFilter,{enabled = true} : {enabled ? : boolean}){
+export function useVideos(filters:VideoFilter,{enabled = true} : {enabled ? : boolean}= {}){
     return useQuery({
         queryKey : videoKeys.list(filters),
         queryFn : ()=> getVideos(filters),

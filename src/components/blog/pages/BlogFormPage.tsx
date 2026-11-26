@@ -12,7 +12,9 @@ import { getEditBlockedReason } from "../blogPermissions";
 const PageMessage = ({title,children}:{title:string,children?:ReactNode}) => {
     const location = useLocation();
     const stateReturnTo = (location.state as { returnTo? : string } | null)?.returnTo;
-    const returnTo = stateReturnTo?.startsWith('/blogs') ? stateReturnTo : '/blogs';
+    const returnTo = stateReturnTo && (stateReturnTo.startsWith('/blogs') || stateReturnTo.startsWith('/admin/review'))
+        ? stateReturnTo
+        : '/blogs';
 
     return(
     <div className="flex flex-col gap-6">

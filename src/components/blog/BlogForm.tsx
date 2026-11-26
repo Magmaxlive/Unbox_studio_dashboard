@@ -65,7 +65,7 @@ const BlogForm = ({initialBlog,liveBlog}:BlogFormProps) => {
     const navigate = useNavigate();
     const location = useLocation();
     const stateReturnTo = (location.state as { returnTo? : string } | null)?.returnTo;
-    const returnTo = stateReturnTo?.startsWith('/blogs') ? stateReturnTo : '/blogs'; 
+    const returnTo = stateReturnTo && (stateReturnTo?.startsWith('/blogs') || stateReturnTo?.startsWith('/admin/reviews') ) ? stateReturnTo : '/blogs'; 
 
     const {user} = useAuth();
     const isAdmin = user?.role === 'admin';
